@@ -28,41 +28,25 @@ def load_png(name):
 
 
 
-class Ship(pygame.sprite.Sprite, ConnectionListener):
-    """
-    Classe représentant le vaisseau côté client.
-    """
+class Bar(pygame.sprite.Sprite, ConnectionListener):
+    '''
+    Classe représentant la bar sur laquelle la balle rebondit
+    '''
 
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.image, self.rect = load_png('Pics/ship.png')
+        self.image, self.rect = load_png('images/bar.png')
         self.rect.center = [SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2]
         self.speed = [3, 3]
         self.pas = 10
 
-    def Network_ship(self, data):
+    def Network_bar(self, data):
         self.rect.center = data['center']
 
     def update(self):
         self.Pump()
 
-
-class Tir(pygame.sprite.Sprite):
-    """
-    Classe de tir
-    """
-
-    def __init__(self, coordonnees):
-        pygame.sprite.Sprite.__init__(self)
-        self.image, self.rect = load_png("Pics/shot.png");
-        self.speed = [0, -1]
-        self.rect.center = coordonnees
-
-    def update(self):
-        pass
-
-
-class Tirs(pygame.sprite.Group, ConnectionListener):
+class Bars(pygame.sprite.Group, ConnectionListener):
     """
     Classe de groupe de tirs côté client.
     """
@@ -73,14 +57,27 @@ class Tirs(pygame.sprite.Group, ConnectionListener):
     def update(self):
         self.Pump()
 
-    def Network_shot(self, data):
-        self.empty()
-        listeTir = data["liste"]
-        # print listeTir
-        for xy in listeTir:
-            tir = Tir(xy)
-            self.add(tir)
+class Ball(pygame.sprite.Sprite, ConnectionListener):
+    '''
+    Classe représentant la bille du jeu
+    '''
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        #self.image, self.rect = load_png('Pics/ball.png')
+        self.rect.center = [SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2]
+        self.speed = [3, 3]
+        self.pas = 10
 
+    def Network_ball(self, data):
+        self.rect.center = data['center']
+
+    def update(self):
+        self.Pump()
+
+#class Brick(pygame.sprite.Sprite, ConnectionListener):
+    '''
+    Classe représentant une brique à casser
+    '''
 
 class Client(ConnectionListener):
     def __init__(self, host, port):
@@ -92,7 +89,7 @@ class Client(ConnectionListener):
         self.Pump()
 
     def Network(self, data):
-        # ('message de type %s recu' % data['action'])
+        ('message de type %s recu' % data['action'])
         # print data
         pass
 
@@ -114,17 +111,15 @@ def main():
     # Initialisation pygame
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     client = Client(sys.argv[1], int(sys.argv[2]))
-
     pygame.init()
     clock = pygame.time.Clock()
     pygame.key.set_repeat(1, 1)
 
     # On crée les objets
-    background_image, background_rect = load_png('Pics/background.jpg')
-    ship = Ship()  # creation d'une instance de Ship
-    ship_sprites = pygame.sprite.RenderClear()  # creation d'un groupe de sprite
-    ship_sprites.add(ship)
-    tir_sprites = Tirs()
+    background_image, background_rect = load_png('images/background.jpg')
+    bar = Bar()  # creation d'une instance de Bar
+    bar_sprites = pygame.sprite.RenderClear()  # creation d'un groupe de sprite
+    bar_sprites.add(bar)
 
     while True:
         clock.tick(60)  # max speed is 60 frames per second
@@ -141,13 +136,11 @@ def main():
             client.Send({"action": "keys", "keys": touches})
 
             # Refresh connexion + update
-            ship_sprites.update()
-            tir_sprites.update()
+            bar_sprites.update()
 
             # On dessine
             screen.blit(background_image, background_rect)
-            ship_sprites.draw(screen)
-            tir_sprites.draw(screen)
+            bar_sprites.draw(screen)
             pygame.display.flip()
 
 
