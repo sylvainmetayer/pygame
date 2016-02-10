@@ -13,7 +13,11 @@ SCREEN_HEIGHT = 768
 
 
 def load_png(name):
-    """Load image and return image object"""
+    """
+    Permet de charger une image, via son nom.
+    :param name: le chemin de l'image à charger.
+    :return: l'image et le rectangle associé à l'image.
+    """
     fullname = os.path.join('.', name)
     try:
         image = pygame.image.load(fullname)
@@ -27,24 +31,21 @@ def load_png(name):
     return image, image.get_rect()
 
 
-
-class Bar(pygame.sprite.Sprite, ConnectionListener):
+class Bar(pygame.sprite.Sprite):
     '''
     Classe représentant la bar sur laquelle la balle rebondit
     '''
 
-    def __init__(self):
+    def __init__(self, center=(SCREEN_WIDTH/2, SCREEN_HEIGHT/2)):
         pygame.sprite.Sprite.__init__(self)
         self.image, self.rect = load_png('images/bar.png')
-        self.rect.center = [SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2]
+        self.rect.center = center
         self.speed = [3, 3]
         self.pas = 10
 
-    def Network_bar(self, data):
-        self.rect.center = data['center']
-
     def update(self):
-        self.Pump()
+        pass
+
 
 class Bars(pygame.sprite.Group, ConnectionListener):
     """
@@ -56,6 +57,14 @@ class Bars(pygame.sprite.Group, ConnectionListener):
 
     def update(self):
         self.Pump()
+
+    def Network_bar(self, data):
+        self.empty()
+        print "Je recois un message bar"
+        data = data["liste"]
+        for xy in data:
+            bar = Bar(xy)
+            self.add(bar)
 
 class Ball(pygame.sprite.Sprite, ConnectionListener):
     '''
@@ -89,8 +98,8 @@ class Client(ConnectionListener):
         self.Pump()
 
     def Network(self, data):
-        ('message de type %s recu' % data['action'])
-        # print data
+        #('message de type %s recu' % data['action'])
+        print data
         pass
 
     ### Network event/message callbacks ###
@@ -118,8 +127,8 @@ def main():
     # On crée les objets
     background_image, background_rect = load_png('images/background.jpg')
     bar = Bar()  # creation d'une instance de Bar
-    bar_sprites = pygame.sprite.RenderClear()  # creation d'un groupe de sprite
-    bar_sprites.add(bar)
+    bars = Bars()
+    bars.add(bar)
 
     while True:
         clock.tick(60)  # max speed is 60 frames per second
@@ -136,11 +145,11 @@ def main():
             client.Send({"action": "keys", "keys": touches})
 
             # Refresh connexion + update
-            bar_sprites.update()
+            bars.update()
 
             # On dessine
             screen.blit(background_image, background_rect)
-            bar_sprites.draw(screen)
+            bars.draw(screen)
             pygame.display.flip()
 
 

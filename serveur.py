@@ -51,13 +51,13 @@ class Bar(pygame.sprite.Sprite):
 
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.image, self.rect = load_png('Pics/ship.png')
+        self.image, self.rect = load_png('images/bar.png')
 
         # Position de départ
         self.rect.center = [SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2]
 
         self.speed = [3, 3]
-        self.pas = 10 # Vitesse de déplacement
+        self.pas = 10  # Vitesse de déplacement
 
     def left(self):
         if self.rect.left <= 0:
@@ -78,7 +78,6 @@ class Bar(pygame.sprite.Sprite):
             self.speed[0] = 0
         if self.speed[1] >= 5 or self.speed[1] >= -5:
             self.speed[1] = 0
-
 
         self.rect = self.rect.move(self.speed)
 
@@ -109,7 +108,8 @@ class ClientChannel(Channel):
         self._server.del_client(self)
 
     def Network(self, data):
-        print('message de type %s recu' % data['action'])
+        # print('message de type %s recu' % data['action'])
+        pass
 
     def Network_keys(self, data):
         """
@@ -125,8 +125,9 @@ class ClientChannel(Channel):
         if touches[K_LEFT]:
             self.bar.left()
 
-    def send_bar(self):
-        self.Send({"action": "bar", "center": self.bar.rect.center})
+            # def send_bar(self):
+            # pass
+            # Cela servira-t-il a qqch ?
 
     def update_bar(self):
         self.bar.update()
@@ -138,22 +139,27 @@ class MyServer(Server):
     def __init__(self, *args, **kwargs):
         Server.__init__(self, *args, **kwargs)
         self.clients = Bars()
-        #self.run = False
+        # self.run = False
         pygame.init()
         print('Le serveur démarre.')
 
     def Connected(self, channel, addr):
         print('Un client se connecte')
-        self.clients.append(channel)
-        #self.run = True
+        self.clients.add(channel)
+        # self.run = True
 
     def update_bar(self):
         for client in self.clients:
             client.update_bar()
 
     def send_bar(self):
+        liste = []
         for client in self.clients:
-            client.send_bar()
+            liste.append(client.bar.rect.center)
+
+        print liste
+        for client in self.clients:
+            client.Send({"action": "bar", "liste": liste})
 
     def launch_game(self):
         pygame.display.set_caption("Server")
@@ -165,9 +171,9 @@ class MyServer(Server):
             clock.tick(60)
             time.sleep(0.01)
             self.Pump()
-
-            self.update_bar()
-            self.send_bar()
+            if len(self.clients) > 0:
+                self.update_bar()
+                self.send_bar()
 
             screen.blit(background_image, background_rect)
             pygame.display.flip()
