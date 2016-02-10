@@ -19,7 +19,8 @@ TODO
 - Faire bouger les vaisseaux en même temps
 - Ajouter la balle et la gestion de mort en cas de sortie de l'écran.
 - Ajouter les briques et la gestion de rebond.
-- Ajouter la gestion des tirs et de la mort de la barre adverse.
+- Ajouter la des monstres qui poppent via des briques speciales et de la mort de la barre adverse.
+-
 - ... ?
 """
 
@@ -82,7 +83,7 @@ class Bar(pygame.sprite.Sprite):
         self.rect = self.rect.move(self.speed)
 
 
-class Bars(pygame.sprite.Group):
+class Bars(pygame.sprite.RenderClear):
     """
     Classe qui contient un tableau de clients de bar
     """
@@ -94,14 +95,15 @@ class Bars(pygame.sprite.Group):
         for client in self.sprites():
             client.bar.update()
 
-
-class ClientChannel(Channel):
+# TODO Le Sprite qui n'a rien a foutre la, mais qui fait fonctionner le jeu en multi :D
+class ClientChannel(Channel, pygame.sprite.Sprite):
     """
     Cette classe gère un client, qui se connecte au serveur, et lui attribue un bar.
     """
 
     def __init__(self, *args, **kwargs):
         Channel.__init__(self, *args, **kwargs)
+        pygame.sprite.Sprite.__init__(self)
         self.bar = Bar()
 
     def Close(self):
@@ -117,12 +119,9 @@ class ClientChannel(Channel):
         :param data: Les données reçues du client.
         """
         touches = data['keys']
-        if touches[K_q]:
-            print "Le client s'est deconnecté du jeu :("
-            sys.exit(1)
-        if touches[K_RIGHT]:
+        if touches[K_RIGHT] or touches[K_d]:
             self.bar.right()
-        if touches[K_LEFT]:
+        if touches[K_LEFT] or touches[K_q]:
             self.bar.left()
 
             # def send_bar(self):
@@ -157,7 +156,7 @@ class MyServer(Server):
         for client in self.clients:
             liste.append(client.bar.rect.center)
 
-        print liste
+        #print liste
         for client in self.clients:
             client.Send({"action": "bar", "liste": liste})
 
