@@ -6,12 +6,12 @@ import pygame
 import sys
 import time
 from pygame.locals import *
+import outils
 
 from PodSixNet.Channel import Channel
 from PodSixNet.Server import Server
 
-SCREEN_WIDTH = 1024
-SCREEN_HEIGHT = 768
+
 
 """
 TODO
@@ -55,7 +55,7 @@ class Bar(pygame.sprite.Sprite):
         self.image, self.rect = load_png('images/bar.png')
 
         # Position de départ
-        self.rect.center = [SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2]
+        self.rect.center = [outils.SCREEN_WIDTH / 2, outils.SCREEN_HEIGHT / 2]
 
         self.speed = [3, 3]
         self.pas = 10  # Vitesse de déplacement
@@ -67,7 +67,7 @@ class Bar(pygame.sprite.Sprite):
             self.rect = self.rect.move([-self.pas, 0])
 
     def right(self):
-        if self.rect.right >= SCREEN_WIDTH:
+        if self.rect.right >= outils.SCREEN_WIDTH:
             self.rect = self.rect.move([0, 0])
         else:
             self.rect = self.rect.move([self.pas, 0])
@@ -82,6 +82,14 @@ class Bar(pygame.sprite.Sprite):
 
         self.rect = self.rect.move(self.speed)
 
+    def set_position(self, position):
+        """
+        Cette fonction permet de définir la position de départ. Elle est normalement uniquement utilisée
+        lors de l'instanciation de joueurs
+        :param position: tuple de la position
+        """
+        self.rect.center  = position
+
 
 class Bars(pygame.sprite.RenderClear):
     """
@@ -94,6 +102,11 @@ class Bars(pygame.sprite.RenderClear):
     def update(self):
         for client in self.sprites():
             client.bar.update()
+
+    def __getitem__(self, item):
+        for key, value in enumerate(self.sprites()):
+            if key == item:
+                return value
 
 # TODO Le Sprite qui n'a rien a foutre la, mais qui fait fonctionner le jeu en multi :D
 class ClientChannel(Channel, pygame.sprite.Sprite):
@@ -143,37 +156,58 @@ class MyServer(Server):
         print('Le serveur démarre.')
 
     def Connected(self, channel, addr):
-        print('Un client se connecte')
         self.clients.add(channel)
+        if len(self.clients) == 1:
+            print 'Je set la pos du J1'
+            clientTmp = self.clients.__getitem__(0)
+            clientTmp.bar.set_position(outils.POS_J1)
+        elif len(self.clients) == 2:
+            print "Je set la pos du J2"
+            clientTmp = self.clients.__getitem__(1)
+            clientTmp.bar.set_position(outils.POS_J2)
+        else: # Joueur 2
+            print "La partie est pleine."
+            channel.Send({"action":"error", "error":"La partie est pleine"})
+        print 'Un client se connecte'
         # self.run = True
 
     def update_bar(self):
         for client in self.clients:
             client.update_bar()
 
-    def send_bar(self):
+    def get_positions_bars(self):
+        """
+        TODO fonction qui retourne la liste de toutes les positions des barres
+        :return:
+        """
         liste = []
         for client in self.clients:
             liste.append(client.bar.rect.center)
+        return liste
 
-        #print liste
+    def send_bar(self):
+
         for client in self.clients:
-            client.Send({"action": "bar", "liste": liste})
+            client.Send({"action": "bar", "liste": self.get_positions_bars()})
 
     def launch_game(self):
         pygame.display.set_caption("Server")
-        screen = pygame.display.set_mode((SCREEN_WIDTH / 4, SCREEN_HEIGHT / 4))
+        screen = pygame.display.set_mode((outils.SCREEN_WIDTH / 4, outils.SCREEN_HEIGHT / 4))
         background_image, background_rect = load_png('images/background.jpg')
         clock = pygame.time.Clock()
 
         while True:
-            clock.tick(60)
-            time.sleep(0.01)
             self.Pump()
-            if len(self.clients) > 0:
+            clock.tick(60)
+
+            # Les clients ne bougeront pas tant que deux clients n'auront pas rejoints.
+            # En phase de dev, on s'en fiche, on le sette à 1.
+            # if len(self.clients) == 2:
+            if len(self.clients) == 1:
                 self.update_bar()
                 self.send_bar()
 
+            # On dessine
             screen.blit(background_image, background_rect)
             pygame.display.flip()
 

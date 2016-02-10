@@ -60,9 +60,9 @@ class Bars(pygame.sprite.Group, ConnectionListener):
 
     def Network_bar(self, data):
         self.empty()
-        print "Je recois un message bar"
-        data = data["liste"]
-        for xy in data:
+        donnees = data["liste"]
+        print data
+        for xy in donnees:
             bar = Bar(xy)
             self.add(bar)
 
