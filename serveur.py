@@ -13,13 +13,23 @@ from PodSixNet.Server import Server
 SCREEN_WIDTH = 1024
 SCREEN_HEIGHT = 768
 
-#Gestion Tirs
-tirCompteurTmp = 30
-shotAllowed = True
+"""
+TODO
+- Chercher des images plus tard
+- Faire bouger les vaisseaux en même temps
+- Ajouter la balle et la gestion de mort en cas de sortie de l'écran.
+- Ajouter les briques et la gestion de rebond.
+- Ajouter la gestion des tirs et de la mort de la barre adverse.
+- ... ?
+"""
 
 
 def load_png(name):
-    """Load image and return image object"""
+    """
+    Permet de charger une image, via son nom.
+    :param name: le chemin de l'image à charger.
+    :return: l'image et le rectangle associé à l'image.
+    """
     fullname = os.path.join('.', name)
     try:
         image = pygame.image.load(fullname)
@@ -33,152 +43,93 @@ def load_png(name):
     return image, image.get_rect()
 
 
-class Tir(pygame.sprite.Sprite):
+class Bar(pygame.sprite.Sprite):
     """
-    Classe de tir du vaisseau
-    """
-
-    def __init__(self, ship):
-        pygame.sprite.Sprite.__init__(self)
-        self.image, self.rect = load_png('Pics/shot.png')
-        self.speed = [0, -1]
-        self.rect.center = ship.rect.center
-
-    def update(self):
-        """
-
-        :return: True si le tir est mort, False sinon
-        """
-        self.rect = self.rect.move([0, -10])
-        if self.rect.top <= -20:
-            self.kill()
-            return True;
-        return False;
-
-
-class Tirs(pygame.sprite.Group):
-    """
-    Classe le groupe de tirs côté serveur.
-    """
-
-    def __init__(self):
-        pygame.sprite.Group.__init__(self)
-
-    def update(self):
-        for tir in self.sprites():
-            retour = tir.update()
-            if retour == True:
-                self.remove(tir);  # Le tir est mort.
-
-
-class Ship(pygame.sprite.Sprite):
-    """
-    Classe représentant le vaisseau côté serveur.
+    Classe représentant la barre d'un joueur, côté serveur.
+    Attribut : une image, une position (le rect de l'image) et une vitesse.
     """
 
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
         self.image, self.rect = load_png('Pics/ship.png')
+
+        # Position de départ
         self.rect.center = [SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2]
+
         self.speed = [3, 3]
-        self.pas = 10
-
-    def up(self):
-        if self.rect.top <= 0:
-            self.rect = self.rect.move([0, 0])
-        else:
-            self.rect = self.rect.move([0, -self.pas])
-
-    def down(self):
-        if self.rect.bottom >= SCREEN_HEIGHT:
-            self.rect = self.rect.move([0, 0])
-        else:
-            self.rect = self.rect.move([0, self.pas])
-            # self.speed[1] += 1
+        self.pas = 10 # Vitesse de déplacement
 
     def left(self):
         if self.rect.left <= 0:
             self.rect = self.rect.move([0, 0])
         else:
             self.rect = self.rect.move([-self.pas, 0])
-            # self.speed[0] -= 1
 
     def right(self):
         if self.rect.right >= SCREEN_WIDTH:
             self.rect = self.rect.move([0, 0])
         else:
             self.rect = self.rect.move([self.pas, 0])
-            # self.speed[0] += 1
 
     def update(self):
+
+        # On gère que la vitesse ne soit pas trop élevée.
         if self.speed[0] >= 5 or self.speed[0] >= -5:
             self.speed[0] = 0
         if self.speed[1] >= 5 or self.speed[1] >= -5:
             self.speed[1] = 0
+
+
         self.rect = self.rect.move(self.speed)
+
+
+class Bars(pygame.sprite.Group):
+    """
+    Classe qui contient un tableau de clients de bar
+    """
+
+    def __init__(self):
+        pygame.sprite.Group.__init__(self)
+
+    def update(self):
+        for client in self.sprites():
+            client.bar.update()
 
 
 class ClientChannel(Channel):
     """
-    Cette classe gère un client, qui se connecte au serveur, et lui attribue un vaisseau.
+    Cette classe gère un client, qui se connecte au serveur, et lui attribue un bar.
     """
 
     def __init__(self, *args, **kwargs):
         Channel.__init__(self, *args, **kwargs)
-
-        # Gestion vaisseau
-        self.ship = Ship()
-        self.ship_sprite = pygame.sprite.RenderClear()
-        self.ship_sprite.add(self.ship)
-
-        # Gestion tirs
-        self.tir_sprites = Tirs()
+        self.bar = Bar()
 
     def Close(self):
         self._server.del_client(self)
 
     def Network(self, data):
-        # print('message de type %s recu' % data['action'])
-        pass
+        print('message de type %s recu' % data['action'])
 
     def Network_keys(self, data):
         """
         Cette fonction permet de récupérer les mouvements du client, et de les traiter.
-        :param data:
-        :return:
+        :param data: Les données reçues du client.
         """
         touches = data['keys']
-        if touches[K_UP]:
-            self.ship.up()
         if touches[K_q]:
-            print "Le client s'est deconnecté du jeu"
+            print "Le client s'est deconnecté du jeu :("
             sys.exit(1)
-        if touches[K_DOWN]:
-            self.ship.down()
         if touches[K_RIGHT]:
-            self.ship.right()
+            self.bar.right()
         if touches[K_LEFT]:
-            self.ship.left()
-        if touches[K_SPACE]:
-            #if shotAllowed:
-            shotAllowed = False
-            tmp = tirCompteurTmp
-            tir = Tir(self.ship)
-            self.tir_sprites.add(tir)
+            self.bar.left()
 
+    def send_bar(self):
+        self.Send({"action": "bar", "center": self.bar.rect.center})
 
-    def send_shot(self):
-        liste = []
-        for tir in self.tir_sprites:
-            liste.append(tir.rect.center)
-        self.Send({"action": "shot", "liste": liste})
-
-    def send_ship(self):
-        self.Send({"action": "ship", "center": self.ship.rect.center})
-
-    def update_ship(self):
-        self.ship_sprite.update()
-        self.tir_sprites.update()
+    def update_bar(self):
+        self.bar.update()
 
 
 class MyServer(Server):
@@ -186,52 +137,37 @@ class MyServer(Server):
 
     def __init__(self, *args, **kwargs):
         Server.__init__(self, *args, **kwargs)
-        self.clients = []
-        self.run = False
+        self.clients = Bars()
+        #self.run = False
         pygame.init()
-        print('Server launched')
+        print('Le serveur démarre.')
 
     def Connected(self, channel, addr):
-        print('New connection')
+        print('Un client se connecte')
         self.clients.append(channel)
-        self.run = True
+        #self.run = True
 
-    def update_ship(self):
+    def update_bar(self):
         for client in self.clients:
-            client.update_ship()
+            client.update_bar()
 
-    def send_ship(self):
+    def send_bar(self):
         for client in self.clients:
-            client.send_ship()
-
-    def send_shot(self):
-        for client in self.clients:
-            client.send_shot();
+            client.send_bar()
 
     def launch_game(self):
         pygame.display.set_caption("Server")
         screen = pygame.display.set_mode((SCREEN_WIDTH / 4, SCREEN_HEIGHT / 4))
-        background_image, background_rect = load_png('Pics/background.jpg')
+        background_image, background_rect = load_png('images/background.jpg')
         clock = pygame.time.Clock()
-
-
-        #Gestion Tirs:
-
 
         while True:
             clock.tick(60)
             time.sleep(0.01)
             self.Pump()
 
-            if self.run:
-                self.update_ship()
-                self.send_ship()
-                self.send_shot()
-
-            # Gestion Tirs
-            tirCompteurTmp = tirCompteurTmp - 1
-            if tirCompteurTmp <= 0:
-                shotAllowed = True
+            self.update_bar()
+            self.send_bar()
 
             screen.blit(background_image, background_rect)
             pygame.display.flip()
