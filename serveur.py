@@ -4,14 +4,12 @@
 import os
 import pygame
 import sys
-import time
 from pygame.locals import *
-import outils
 
 from PodSixNet.Channel import Channel
 from PodSixNet.Server import Server
 
-
+import outils
 
 """
 TODO
@@ -165,6 +163,8 @@ class MyServer(Server):
             print "Je set la pos du J2"
             clientTmp = self.clients.__getitem__(1)
             clientTmp.bar.set_position(outils.POS_J2)
+            self.send_info("gameStart", "C'est parti !")
+            print "Debut du jeu !"
         else: # Joueur 2
             print "La partie est pleine."
             channel.Send({"action":"error", "error":"La partie est pleine"})
@@ -190,9 +190,16 @@ class MyServer(Server):
         for client in self.clients:
             client.Send({"action": "bar", "liste": self.get_positions_bars()})
 
-    def send_info(self, message):
+    def send_info(self, action, message):
+        """
+        Cette méthode permet d'envoyer un message à tous les
+        joueurs, en précisant le type et le contenu du message
+        :param action: Type du message
+        :param message: Généralement une String, pour informer de qqch
+        :return:
+        """
         for client in self.clients:
-            client.Send({"action":"info", "message":message})
+            client.Send({"action":action, "message":message})
 
     def launch_game(self):
         pygame.display.set_caption("Server")
@@ -204,11 +211,17 @@ class MyServer(Server):
             self.Pump()
             clock.tick(60)
 
+
+            # Pour permettre de quitter le serveur
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    sys.exit(0)
+
             if len(self.clients) == 2:
                 self.update_bar()
                 self.send_bar()
             else:
-                self.send_info("En atttente d'un autre joueur pour commencer la partie...")
+                self.send_info("info", "En atttente d'un autre joueur pour commencer la partie...")
 
             # On dessine
             screen.blit(background_image, background_rect)
@@ -224,7 +237,15 @@ def main_prog():
     Cette fonction crée le serveur et lance le jeu
     :return:
     """
-    my_server = MyServer(localaddr=(sys.argv[1], int(sys.argv[2])))
+
+    if len(sys.argv) == 2:
+        port = sys.argv[2]
+        ip = sys.argv[1]
+    else:
+        port = outils.PORT
+        ip = outils.IP
+
+    my_server = MyServer(localaddr=(ip, int(port)))
     my_server.launch_game()
 
 

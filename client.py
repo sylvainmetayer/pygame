@@ -4,10 +4,10 @@
 import os
 import pygame
 import sys
-import outils
-from pygame.locals import *
 
 from PodSixNet.Connection import connection, ConnectionListener
+
+import outils
 
 
 def load_png(name):
@@ -70,10 +70,10 @@ class Ball(pygame.sprite.Sprite, ConnectionListener):
     '''
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        #self.image, self.rect = load_png('Pics/ball.png')
+        self.image, self.rect = load_png('images/balle.png')
         self.rect.center = [outils.SCREEN_WIDTH/ 2, outils.SCREEN_HEIGHT / 2]
-        self.speed = [3, 3]
-        self.pas = 10
+        #self.speed = [3, 3]
+        #self.pas = 10
 
     def Network_ball(self, data):
         self.rect.center = data['center']
@@ -118,25 +118,49 @@ class Client(ConnectionListener):
         sys.exit()
 
 def main():
-    # Initialisation pygame
+    # Initialisation de l'écran
     screen = pygame.display.set_mode((outils.SCREEN_WIDTH, outils.SCREEN_HEIGHT))
-    client = Client(sys.argv[1], int(sys.argv[2]))
+
+    """
+    Récupération IP / PORT :
+        - de la ligne de commande
+        OU
+        - du fichier de configuration
+    """
+    if len(sys.argv) == 2:
+        port = sys.argv[2]
+        ip = sys.argv[1]
+    else:
+        port = outils.PORT
+        ip = outils.IP
+
+    # Instanciation des composants du jeu.
+    client = Client(ip, int(port))
+    balle = Ball()
+
+    # Initialisation Pygame
     pygame.init()
     clock = pygame.time.Clock()
+
+    # Pour autoriser la répétition des touches pressées
     pygame.key.set_repeat(1, 1)
 
-    # On crée les objets
+    # Fond du jeu
     background_image, background_rect = load_png('images/background.jpg')
+
+    # Barre
     bar = Bar()  # creation d'une instance de Bar
     bars = Bars()
     bars.add(bar)
 
+    # Boucle de jeu principale
     while True:
         clock.tick(60)  # max speed is 60 frames per second
+
+        # IMPORTANT : pump de la connexion
         client.Loop()
 
-
-        # Si le client lance le jeu
+        # Si le client est autorisé à jouer
         if client.game_client is True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -144,6 +168,7 @@ def main():
 
             # Refresh connexion
             bars.update()
+            balle.update()
             # Récupération des touches
             touches = pygame.key.get_pressed()
 
@@ -153,10 +178,10 @@ def main():
             # On dessine
             screen.blit(background_image, background_rect)
             bars.draw(screen)
+            screen.blit(balle.image, balle.rect)
             pygame.display.flip()
 
 
 if __name__ == '__main__':
-    print "Je passe dans le main"
     main()
     sys.exit(0)
