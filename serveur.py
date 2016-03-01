@@ -190,6 +190,10 @@ class MyServer(Server):
         for client in self.clients:
             client.Send({"action": "bar", "liste": self.get_positions_bars()})
 
+    def send_info(self, message):
+        for client in self.clients:
+            client.Send({"action":"info", "message":message})
+
     def launch_game(self):
         pygame.display.set_caption("Server")
         screen = pygame.display.set_mode((outils.SCREEN_WIDTH / 4, outils.SCREEN_HEIGHT / 4))
@@ -200,12 +204,11 @@ class MyServer(Server):
             self.Pump()
             clock.tick(60)
 
-            # Les clients ne bougeront pas tant que deux clients n'auront pas rejoints.
-            # En phase de dev, on s'en fiche, on le sette à 1.
-            # if len(self.clients) == 2:
-            if len(self.clients) == 1:
+            if len(self.clients) == 2:
                 self.update_bar()
                 self.send_bar()
+            else:
+                self.send_info("En atttente d'un autre joueur pour commencer la partie...")
 
             # On dessine
             screen.blit(background_image, background_rect)

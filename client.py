@@ -4,12 +4,10 @@
 import os
 import pygame
 import sys
+import outils
 from pygame.locals import *
 
 from PodSixNet.Connection import connection, ConnectionListener
-
-SCREEN_WIDTH = 1024
-SCREEN_HEIGHT = 768
 
 
 def load_png(name):
@@ -36,7 +34,7 @@ class Bar(pygame.sprite.Sprite):
     Classe représentant la bar sur laquelle la balle rebondit
     '''
 
-    def __init__(self, center=(SCREEN_WIDTH/2, SCREEN_HEIGHT/2)):
+    def __init__(self, center=(outils.SCREEN_WIDTH/2, outils.SCREEN_HEIGHT/2)):
         pygame.sprite.Sprite.__init__(self)
         self.image, self.rect = load_png('images/bar.png')
         self.rect.center = center
@@ -73,7 +71,7 @@ class Ball(pygame.sprite.Sprite, ConnectionListener):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
         #self.image, self.rect = load_png('Pics/ball.png')
-        self.rect.center = [SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2]
+        self.rect.center = [outils.SCREEN_WIDTH/ 2, outils.SCREEN_HEIGHT / 2]
         self.speed = [3, 3]
         self.pas = 10
 
@@ -102,6 +100,9 @@ class Client(ConnectionListener):
         print data
         pass
 
+    def Network_info(self,data):
+        print data['message']
+
     ### Network event/message callbacks ###
     def Network_connected(self, data):
         print('connecte au serveur !')
@@ -118,7 +119,7 @@ class Client(ConnectionListener):
 
 def main():
     # Initialisation pygame
-    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+    screen = pygame.display.set_mode((outils.SCREEN_WIDTH, outils.SCREEN_HEIGHT))
     client = Client(sys.argv[1], int(sys.argv[2]))
     pygame.init()
     clock = pygame.time.Clock()
@@ -134,18 +135,20 @@ def main():
         clock.tick(60)  # max speed is 60 frames per second
         client.Loop()
 
+
         # Si le client lance le jeu
         if client.game_client is True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     sys.exit(0)
 
+            # Refresh connexion
+            bars.update()
             # Récupération des touches
             touches = pygame.key.get_pressed()
-            client.Send({"action": "keys", "keys": touches})
 
-            # Refresh connexion + update
-            bars.update()
+            # Notification au serveur
+            client.Send({"action": "keys", "keys": touches})
 
             # On dessine
             screen.blit(background_image, background_rect)
