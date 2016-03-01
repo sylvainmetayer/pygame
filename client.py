@@ -71,11 +71,11 @@ class Ball(pygame.sprite.Sprite, ConnectionListener):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
         self.image, self.rect = load_png('images/balle.png')
-        self.rect.center = [outils.SCREEN_WIDTH/ 2, outils.SCREEN_HEIGHT / 2]
+        self.rect.center = outils.POS_BALLE
         #self.speed = [3, 3]
         #self.pas = 10
 
-    def Network_ball(self, data):
+    def Network_balle(self, data):
         self.rect.center = data['center']
 
     def update(self):
@@ -147,6 +147,7 @@ def main():
 
     # Fond du jeu
     background_image, background_rect = load_png('images/background.jpg')
+    background_load, background_load_rect = load_png("images/loading.jpg")
 
     # Barre
     bar = Bar()  # creation d'une instance de Bar
@@ -159,16 +160,17 @@ def main():
 
         # IMPORTANT : pump de la connexion
         client.Loop()
+        bars.update()
+        balle.update()
 
-        # Si le client est autorisé à jouer
-        if client.game_client is True:
-            for event in pygame.event.get():
+        # Pour quitter
+        for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     sys.exit(0)
 
-            # Refresh connexion
-            bars.update()
-            balle.update()
+        if len(bars) == 2:
+        # 2 joueurs, la partie peut commencer
+
             # Récupération des touches
             touches = pygame.key.get_pressed()
 
@@ -179,8 +181,12 @@ def main():
             screen.blit(background_image, background_rect)
             bars.draw(screen)
             screen.blit(balle.image, balle.rect)
-            pygame.display.flip()
+        else:
+            # On affiche un loader
+            screen.blit(background_load, background_load_rect)
 
+        # IMPORTANT : C'est ça qui affiche à l'écran.
+        pygame.display.flip()
 
 if __name__ == '__main__':
     main()

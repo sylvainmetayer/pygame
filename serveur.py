@@ -143,12 +143,38 @@ class ClientChannel(Channel, pygame.sprite.Sprite):
         self.bar.update()
 
 
+class Ball(pygame.sprite.Sprite):
+    """
+    Classe représentant la bille du jeu côté serveur
+    """
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image, self.rect = load_png('images/balle.png')
+        self.rect.center = outils.POS_BALLE
+        self.speed = [3, 3]
+        self.pas = 10
+
+    def Network_ball(self, data):
+        self.rect.center = data['center']
+
+    def update(self):
+         # On gère que la vitesse ne soit pas trop élevée.
+        if self.speed[0] >= 5 or self.speed[0] >= -5:
+            self.speed[0] = 3
+        if self.speed[1] >= 5 or self.speed[1] >= -5:
+            self.speed[1] = 3
+
+        self.rect = self.rect.move(self.speed)
+
 class MyServer(Server):
     channelClass = ClientChannel
 
     def __init__(self, *args, **kwargs):
         Server.__init__(self, *args, **kwargs)
+        pygame.display.set_caption("Server")
+        self.screen = pygame.display.set_mode(outils.SIZE_SERVEUR)
         self.clients = Bars()
+        self.balle = Ball()
         # self.run = False
         pygame.init()
         print('Le serveur démarre.')
@@ -159,13 +185,13 @@ class MyServer(Server):
             print 'Je set la pos du J1'
             clientTmp = self.clients.__getitem__(0)
             clientTmp.bar.set_position(outils.POS_J1)
-        elif len(self.clients) == 2:
+        elif len(self.clients) == 2: # Joueur 2
             print "Je set la pos du J2"
             clientTmp = self.clients.__getitem__(1)
             clientTmp.bar.set_position(outils.POS_J2)
             self.send_info("gameStart", "C'est parti !")
             print "Debut du jeu !"
-        else: # Joueur 2
+        else: # Partie pleine
             print "La partie est pleine."
             channel.Send({"action":"error", "error":"La partie est pleine"})
         print 'Un client se connecte'
@@ -175,10 +201,12 @@ class MyServer(Server):
         for client in self.clients:
             client.update_bar()
 
+    def update_balle(self):
+        self.balle.update()
+
     def get_positions_bars(self):
         """
-        TODO fonction qui retourne la liste de toutes les positions des barres
-        :return:
+        Fonction qui retourne une liste de la position des joueurs.
         """
         liste = []
         for client in self.clients:
@@ -186,9 +214,12 @@ class MyServer(Server):
         return liste
 
     def send_bar(self):
-
         for client in self.clients:
             client.Send({"action": "bar", "liste": self.get_positions_bars()})
+
+    def send_balle(self):
+        for client in self.clients:
+            client.Send({"action":"balle", "center":self.balle.rect.center})
 
     def send_info(self, action, message):
         """
@@ -202,15 +233,14 @@ class MyServer(Server):
             client.Send({"action":action, "message":message})
 
     def launch_game(self):
-        pygame.display.set_caption("Server")
-        screen = pygame.display.set_mode((outils.SCREEN_WIDTH / 4, outils.SCREEN_HEIGHT / 4))
+        screen = self.screen
         background_image, background_rect = load_png('images/background.jpg')
+        background_load, background_load_rect = load_png("images/loading_mini.gif")
         clock = pygame.time.Clock()
 
         while True:
             self.Pump()
             clock.tick(60)
-
 
             # Pour permettre de quitter le serveur
             for event in pygame.event.get():
@@ -219,12 +249,14 @@ class MyServer(Server):
 
             if len(self.clients) == 2:
                 self.update_bar()
+                self.update_balle()
                 self.send_bar()
+                self.send_balle()
+                screen.blit(background_image, background_rect)
             else:
-                self.send_info("info", "En atttente d'un autre joueur pour commencer la partie...")
+                screen.blit(background_load, background_load_rect)
 
             # On dessine
-            screen.blit(background_image, background_rect)
             pygame.display.flip()
 
     def del_client(self, channel):
