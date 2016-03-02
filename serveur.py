@@ -87,7 +87,7 @@ class Bar(pygame.sprite.Sprite):
         lors de l'instanciation de joueurs
         :param position: tuple de la position
         """
-        self.rect.center  = position
+        self.rect.center = position
 
 
 class Bars(pygame.sprite.RenderClear):
@@ -107,6 +107,7 @@ class Bars(pygame.sprite.RenderClear):
             if key == item:
                 return value
 
+
 # TODO Le Sprite qui n'a rien a foutre la, mais qui fait fonctionner le jeu en multi :D
 class ClientChannel(Channel, pygame.sprite.Sprite):
     """
@@ -122,7 +123,6 @@ class ClientChannel(Channel, pygame.sprite.Sprite):
         self._server.del_client(self)
 
     def Network(self, data):
-        # print('message de type %s recu' % data['action'])
         pass
 
     def Network_keys(self, data):
@@ -151,6 +151,7 @@ class Ball(pygame.sprite.Sprite):
     """
     Classe représentant la bille du jeu côté serveur
     """
+
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
         self.image, self.rect = load_png('images/balle.png')
@@ -160,6 +161,12 @@ class Ball(pygame.sprite.Sprite):
 
     def Network_ball(self, data):
         self.rect.center = data['center']
+
+    def isPointInsideRect(x, y, rect):
+        if (x > rect.left) and (x < rect.right) and (y > rect.top) and (y < rect.bottom):
+            return True
+        else:
+            return False
 
     def update(self, bar1, bar2):
         """
@@ -171,32 +178,84 @@ class Ball(pygame.sprite.Sprite):
         collide_joueur1 = self.rect.move(self.speed).colliderect(bar1)
         collide_joueur2 = self.rect.move(self.speed).colliderect(bar2)
 
-        print "Collide J1 : " +  str(collide_joueur1)
+        print "Collide J1 : " + str(collide_joueur1)
         print "Collide J2 : " + str(collide_joueur2)
 
         if collide_joueur1 == 0 and collide_joueur2 == 0:
             self.rect = self.rect.move(self.speed)
-            print self.rect
             # Pas de collision
         else:
+            if collide_joueur1 != 0:
+                # La balle a touché la barre du joueur 1
+                centerJoueur = bar1.rect.center
+                print "DATA JOUEUR 1"
+                leftJoueur = bar1.rect.left
+                rightJoueur = bar1.rect.right
+
+            if collide_joueur2 != 0:
+                # La balle a touché la barre du joueur 2
+                centerJoueur = bar2.rect.center
+                print "DATA JOUEUR 2"
+                leftJoueur = bar2.rect.left
+                rightJoueur = bar2.rect.right
+
+            print "Center : " + str(centerJoueur)
+            print "Left : " + str(leftJoueur)
+            print "Right : " + str(rightJoueur)
+
+            print "DATA BALLE"
+            print "Bottom : " + str(self.rect.bottom)
+            print "Center : " + str(self.rect.center)
+            print "Left : " + str(self.rect.left)
+            print "Right : " + str(self.rect.right)
+
+            zoneLeftMax = leftJoueur + 20
+            if leftJoueur <= self.rect.bottom <= zoneLeftMax:
+                print "ZONE gauche atteinte"
+                if collide_joueur1 != 0:
+                    self.reverse(outils.LEFT_UP)
+                else:
+                    self.reverse(outils.LEFT_DOWN)
+
+            zoneRightMax = rightJoueur - 20
+            if rightJoueur <= self.rect.bottom <= zoneRightMax:
+                print "ZONE droite atteinte"
+                if collide_joueur1 != 0:
+                    self.reverse(outils.RIGHT_UP)
+                else:
+                    self.reverse(outils.RIGHT_DOWN)
+
             """
             TODO gestion plus fine, et modifier la fonction reverse de sorte à lui passer un argument
             genre 'left' 'right' 'topleft' ... et ainsi déplacer de plus de façon la balle
             """
-            self.reverse()
+            if collide_joueur1 != 0:
+                self.reverse(outils.DOWN)
+            elif collide_joueur2 != 0:
+                self.reverse(outils.UP)
+
+            # self.reverse()
             # Collision, on fait demi-tour !
 
+            # GESTION DES BORDURES
+            if self.rect.left <= 0:
+                self.reverse(outils.RIGHT_UP)
+            if self.rect.right >= outils.SCREEN_WIDTH:
+                self.reverse(outils.LEFT_DOWN)
 
-    def reverse(self):
+    def reverse(self, direction):
         print "SPEED " + str(self.speed)
+        print "DIRECTION " + str(direction)
+        self.speed = direction
+
+        """
         if int(self.speed[0]) == 0 and int(self.speed[1]) == outils.BALL_SPEED:
             print "UP"
-            self.speed[0] = 0
-            self.speed[1] = -outils.BALL_SPEED
+            self.speed = outils.GOTO_UP
         else:
             print "DOWN"
-            self.speed[1] = outils.BALL_SPEED
-            self.speed[0] = 0
+            self.speed = outils.GOTO_DOWN
+        """
 
 
 class MyServer(Server):
@@ -215,27 +274,22 @@ class MyServer(Server):
     def Connected(self, channel, addr):
         self.clients.add(channel)
         if len(self.clients) == 1:
-            print 'Je set la pos du J1'
             clientTmp = self.clients.__getitem__(outils.J1)
             clientTmp.bar.set_position(outils.POS_J1)
-        elif len(self.clients) == 2: # Joueur 2
-            print "Je set la pos du J2"
+        elif len(self.clients) == 2:  # Joueur 2
             clientTmp = self.clients.__getitem__(outils.J2)
             clientTmp.bar.set_position(outils.POS_J2)
             self.send_info("gameStart", "C'est parti !")
-            print "Debut du jeu !"
-        else: # Partie pleine
-            print "La partie est pleine."
-            channel.Send({"action":"error", "error":"La partie est pleine"})
-        print 'Un client se connecte'
-        # self.run = True
+        else:  # Partie pleine
+            channel.Send({"action": "error", "error": "La partie est pleine"})
+            # self.run = True
 
     def update_bar(self):
         for client in self.clients:
             client.update_bar()
 
     def update_balle(self):
-        self.balle.update(self.clients.__getitem__(outils.J1).get_bar(), self.clients.__getitem__(outils.J2).get_bar() )
+        self.balle.update(self.clients.__getitem__(outils.J1).get_bar(), self.clients.__getitem__(outils.J2).get_bar())
 
     def get_positions_bars(self):
         """
@@ -252,7 +306,7 @@ class MyServer(Server):
 
     def send_balle(self):
         for client in self.clients:
-            client.Send({"action":"balle", "center":self.balle.rect.center})
+            client.Send({"action": "balle", "center": self.balle.rect.center})
 
     def send_info(self, action, message):
         """
@@ -263,7 +317,7 @@ class MyServer(Server):
         :return:
         """
         for client in self.clients:
-            client.Send({"action":action, "message":message})
+            client.Send({"action": action, "message": message})
 
     def get_all_clients(self):
         liste = []
@@ -290,7 +344,7 @@ class MyServer(Server):
         background_load, background_load_rect = load_png("images/loading_mini.gif")
         clock = pygame.time.Clock()
 
-        #Petit Timer pour eviter un début du jeu trop brutal
+        # Petit Timer pour eviter un début du jeu trop brutal
         gameStart = False
 
         while True:
@@ -314,8 +368,8 @@ class MyServer(Server):
                 self.send_balle()
 
                 # collisions joueur 1 avec la balle
-                #self.collide_ball(self.balle, self.clients.__getitem__(outils.J1).get_bar())
-                #self.collide_ball(self.balle, self.clients.__getitem__(outils.J2).get_bar())
+                # self.collide_ball(self.balle, self.clients.__getitem__(outils.J1).get_bar())
+                # self.collide_ball(self.balle, self.clients.__getitem__(outils.J2).get_bar())
 
                 screen.blit(background_image, background_rect)
             else:
@@ -325,7 +379,7 @@ class MyServer(Server):
             pygame.display.flip()
 
     def del_client(self, channel):
-        print('client deconnecte')
+        print('DISCONNECTED client')
         self.clients.remove(channel)
 
 
@@ -347,7 +401,7 @@ def main_prog():
 
 
 if len(sys.argv) != 3:
-    print "Usage:", sys.argv[0], "host port"
+    print "Usage:", sys.argv[0], "[host] [port]"
 
 if __name__ == '__main__':
     main_prog()

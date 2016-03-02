@@ -34,7 +34,7 @@ class Bar(pygame.sprite.Sprite):
     Classe représentant la bar sur laquelle la balle rebondit
     '''
 
-    def __init__(self, center=(outils.SCREEN_WIDTH/2, outils.SCREEN_HEIGHT/2)):
+    def __init__(self, center=(outils.SCREEN_WIDTH / 2, outils.SCREEN_HEIGHT / 2)):
         pygame.sprite.Sprite.__init__(self)
         self.image, self.rect = load_png('images/bar.png')
         self.rect.center = center
@@ -59,21 +59,23 @@ class Bars(pygame.sprite.Group, ConnectionListener):
     def Network_bar(self, data):
         self.empty()
         donnees = data["liste"]
-        print data
+        # print data
         for xy in donnees:
             bar = Bar(xy)
             self.add(bar)
+
 
 class Ball(pygame.sprite.Sprite, ConnectionListener):
     '''
     Classe représentant la bille du jeu
     '''
+
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
         self.image, self.rect = load_png('images/balle.png')
         self.rect.center = outils.POS_BALLE
-        #self.speed = [3, 3]
-        #self.pas = 10
+        # self.speed = [3, 3]
+        # self.pas = 10
 
     def Network_balle(self, data):
         self.rect.center = data['center']
@@ -81,10 +83,11 @@ class Ball(pygame.sprite.Sprite, ConnectionListener):
     def update(self):
         self.Pump()
 
-#class Brick(pygame.sprite.Sprite, ConnectionListener):
+    # class Brick(pygame.sprite.Sprite, ConnectionListener):
     '''
     Classe représentant une brique à casser
     '''
+
 
 class Client(ConnectionListener):
     def __init__(self, host, port):
@@ -96,11 +99,11 @@ class Client(ConnectionListener):
         self.Pump()
 
     def Network(self, data):
-        #('message de type %s recu' % data['action'])
-        print data
+        # ('message de type %s recu' % data['action'])
+        # print data
         pass
 
-    def Network_info(self,data):
+    def Network_info(self, data):
         print data['message']
 
     ### Network event/message callbacks ###
@@ -116,6 +119,7 @@ class Client(ConnectionListener):
     def Network_disconnected(self, data):
         print 'Server disconnected'
         sys.exit()
+
 
 def main():
     # Initialisation de l'écran
@@ -165,11 +169,11 @@ def main():
 
         # Pour quitter
         for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    sys.exit(0)
+            if event.type == pygame.QUIT:
+                sys.exit(0)
 
         if len(bars) == 2:
-        # 2 joueurs, la partie peut commencer
+            # 2 joueurs, la partie peut commencer
 
             # Récupération des touches
             touches = pygame.key.get_pressed()
@@ -187,6 +191,7 @@ def main():
 
         # IMPORTANT : C'est ça qui affiche à l'écran.
         pygame.display.flip()
+
 
 if __name__ == '__main__':
     main()
