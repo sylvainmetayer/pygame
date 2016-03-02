@@ -4,6 +4,7 @@
 import os
 import pygame
 import sys
+import time
 from pygame.locals import *
 
 from PodSixNet.Channel import Channel
@@ -160,22 +161,39 @@ class Ball(pygame.sprite.Sprite):
     def Network_ball(self, data):
         self.rect.center = data['center']
 
-    def update(self):
-         # On gère que la vitesse ne soit pas trop élevée.
-        #if self.speed[0] >= 5 or self.speed[0] >= -5:
-        #    self.speed[0] = 3
-        #if self.speed[1] >= 5 or self.speed[1] >= -5:
-        #    self.speed[1] = 3
+    def update(self, bar1, bar2):
+        """
+        Cette fonction permet de gérer le déplacement de la balle, et les collisions avec les deux bars
+        :param bar1: Joueur 1
+        :param bar2: Joueur 2
+        :return:
+        """
+        collide_joueur1 = self.rect.move(self.speed).colliderect(bar1)
+        collide_joueur2 = self.rect.move(self.speed).colliderect(bar2)
 
-        self.rect = self.rect.move(self.speed)
+        print "Collide J1 : " +  str(collide_joueur1)
+        print "Collide J2 : " + str(collide_joueur2)
+
+        if collide_joueur1 == 0 and collide_joueur2 == 0:
+            self.rect = self.rect.move(self.speed)
+            print self.rect
+            # Pas de collision
+        else:
+            self.reverse()
+            # Collision, on fait demi-tour !
+
 
     def reverse(self):
-        if self.speed[0] == 0:
-            self.speed[0] = outils.BALL_SPEED
-            self.speed[1] = 0
+        print "SPEED " + str(self.speed)
+        if int(self.speed[0]) == 0 and int(self.speed[1]) == outils.BALL_SPEED:
+            print "UP"
+            self.speed[0] = 0
+            self.speed[1] = -outils.BALL_SPEED
         else:
+            print "DOWN"
             self.speed[1] = outils.BALL_SPEED
             self.speed[0] = 0
+
 
 class MyServer(Server):
     channelClass = ClientChannel
@@ -213,7 +231,7 @@ class MyServer(Server):
             client.update_bar()
 
     def update_balle(self):
-        self.balle.update()
+        self.balle.update(self.clients.__getitem__(outils.J1).get_bar(), self.clients.__getitem__(outils.J2).get_bar() )
 
     def get_positions_bars(self):
         """
@@ -249,10 +267,9 @@ class MyServer(Server):
             liste.append(client.bar)
         return liste
 
-    def collide_ball(self, balle, joueur):
-        print "Collide bar !!"
-        if joueur.rect.colliderect(balle.rect):
-            print "TOTO"
+    def collide_ball(self, balle, bar):
+        if balle.rect.colliderect(bar.rect) or balle.rect.colliderect(bar.rect):
+            print "Collision "
             balle.reverse()
             """if dx > 0: # Moving right; Hit the left side of the wall
                 self.rect.right = wall.rect.left
@@ -269,6 +286,9 @@ class MyServer(Server):
         background_load, background_load_rect = load_png("images/loading_mini.gif")
         clock = pygame.time.Clock()
 
+        #Petit Timer pour eviter un début du jeu trop brutal
+        gameStart = False
+
         while True:
             self.Pump()
             clock.tick(60)
@@ -279,14 +299,19 @@ class MyServer(Server):
                     sys.exit(0)
 
             if len(self.clients) == 2:
+                if not gameStart:
+                    gameStart = True
+                    self.send_info("info", "debut du jeu dans 3 secondes !")
+                    time.sleep(3)
+
                 self.update_bar()
                 self.update_balle()
                 self.send_bar()
                 self.send_balle()
 
                 # collisions joueur 1 avec la balle
-                self.collide_ball(self.balle, self.clients.__getitem__(outils.J1).get_bar())
-                self.collide_ball(self.balle, self.clients.__getitem__(outils.J2).get_bar())
+                #self.collide_ball(self.balle, self.clients.__getitem__(outils.J1).get_bar())
+                #self.collide_ball(self.balle, self.clients.__getitem__(outils.J2).get_bar())
 
                 screen.blit(background_image, background_rect)
             else:
