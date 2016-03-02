@@ -179,6 +179,10 @@ class Ball(pygame.sprite.Sprite):
             print self.rect
             # Pas de collision
         else:
+            """
+            TODO gestion plus fine, et modifier la fonction reverse de sorte à lui passer un argument
+            genre 'left' 'right' 'topleft' ... et ainsi déplacer de plus de façon la balle
+            """
             self.reverse()
             # Collision, on fait demi-tour !
 
