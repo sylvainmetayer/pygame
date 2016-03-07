@@ -396,6 +396,7 @@ def main_prog():
         port = outils.PORT
         ip = outils.IP
 
+    print "IP : " + ip + "\tPort : " + str(port)
     my_server = MyServer(localaddr=(ip, int(port)))
     my_server.launch_game()
 
