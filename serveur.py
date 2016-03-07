@@ -158,6 +158,7 @@ class Ball(pygame.sprite.Sprite):
         self.rect.center = outils.POS_BALLE
         self.speed = [0, outils.BALL_SPEED]
         self.pas = 10
+        self.direction = outils.BAS
 
     def Network_ball(self, data):
         self.rect.center = data['center']
@@ -178,14 +179,13 @@ class Ball(pygame.sprite.Sprite):
         collide_joueur1 = self.rect.move(self.speed).colliderect(bar1)
         collide_joueur2 = self.rect.move(self.speed).colliderect(bar2)
 
-        print "Collide J1 : " + str(collide_joueur1)
-        print "Collide J2 : " + str(collide_joueur2)
-
         if collide_joueur1 == 0 and collide_joueur2 == 0:
             self.rect = self.rect.move(self.speed)
             # Pas de collision
         else:
+
             if collide_joueur1 != 0:
+                self.direction = outils.BAS
                 # La balle a touché la barre du joueur 1
                 centerJoueur = bar1.rect.center
                 print "DATA JOUEUR 1"
@@ -193,6 +193,7 @@ class Ball(pygame.sprite.Sprite):
                 rightJoueur = bar1.rect.right
 
             if collide_joueur2 != 0:
+                self.direction = outils.HAUT
                 # La balle a touché la barre du joueur 2
                 centerJoueur = bar2.rect.center
                 print "DATA JOUEUR 2"
@@ -208,39 +209,32 @@ class Ball(pygame.sprite.Sprite):
             print "Center : " + str(self.rect.center)
             print "Left : " + str(self.rect.left)
             print "Right : " + str(self.rect.right)
+            zoneRightMax = rightJoueur - outils.MARGE_ZONE
+            zoneLeftMax = leftJoueur + outils.MARGE_ZONE
 
-            zoneLeftMax = leftJoueur + 20
-            if leftJoueur <= self.rect.bottom <= zoneLeftMax:
+            if leftJoueur <= self.rect.center[0] <= zoneLeftMax:
                 print "ZONE gauche atteinte"
                 if collide_joueur1 != 0:
-                    self.reverse(outils.LEFT_UP)
-                else:
+                    print "ZONE Cas 1"
                     self.reverse(outils.LEFT_DOWN)
+                else:
+                    print "ZONE Cas 2"
+                    self.reverse(outils.LEFT_UP)
 
-            zoneRightMax = rightJoueur - 20
-            if rightJoueur <= self.rect.bottom <= zoneRightMax:
+            elif rightJoueur >= self.rect.center[0] >= zoneRightMax:
                 print "ZONE droite atteinte"
                 if collide_joueur1 != 0:
-                    self.reverse(outils.RIGHT_UP)
-                else:
                     self.reverse(outils.RIGHT_DOWN)
+                else:
+                    self.reverse(outils.RIGHT_UP)
 
-            """
-            TODO gestion plus fine, et modifier la fonction reverse de sorte à lui passer un argument
-            genre 'left' 'right' 'topleft' ... et ainsi déplacer de plus de façon la balle
-            """
-            if collide_joueur1 != 0:
+            elif collide_joueur1 != 0:
                 self.reverse(outils.DOWN)
             elif collide_joueur2 != 0:
                 self.reverse(outils.UP)
-
-            # self.reverse()
-            # Collision, on fait demi-tour !
-
-            # GESTION DES BORDURES
-            if self.rect.left <= 0:
+            elif self.rect.left <= 0:
                 self.reverse(outils.RIGHT_UP)
-            if self.rect.right >= outils.SCREEN_WIDTH:
+            elif self.rect.right >= outils.SCREEN_WIDTH:
                 self.reverse(outils.LEFT_DOWN)
 
     def reverse(self, direction):
