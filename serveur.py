@@ -179,7 +179,17 @@ class Ball(pygame.sprite.Sprite):
         collide_joueur1 = self.rect.move(self.speed).colliderect(bar1)
         collide_joueur2 = self.rect.move(self.speed).colliderect(bar2)
 
-        if collide_joueur1 == 0 and collide_joueur2 == 0:
+        if outils.COTE_GAUCHE >= self.rect.left:
+            if self.direction == outils.HAUT:
+                self.reverse(outils.LEFT_UP)
+            else:
+                self.reverse(outils.LEFT_DOWN)
+        elif outils.COTE_DROIT <= self.rect.right:
+            if self.direction == outils.HAUT:
+                self.reverse(outils.RIGHT_UP)
+            else:
+                self.reverse(outils.RIGHT_DOWN)
+        elif collide_joueur1 == 0 and collide_joueur2 == 0:
             self.rect = self.rect.move(self.speed)
             # Pas de collision
         else:
