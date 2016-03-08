@@ -106,15 +106,14 @@ class Client(ConnectionListener):
     def Network_info(self, data):
         print data['message']
 
-    ### Network event/message callbacks ###
     def Network_connected(self, data):
         print('connecte au serveur !')
-        self.game_client = True;
+        self.game_client = True
 
     def Network_error(self, data):
         print 'error:', data['error'][1]
         connection.Close()
-        self.game_client = False;
+        self.game_client = False
 
     def Network_disconnected(self, data):
         print 'Server disconnected'
@@ -154,13 +153,13 @@ def main():
     background_load, background_load_rect = load_png("images/loading.jpg")
 
     # Barre
-    bar = Bar()  # creation d'une instance de Bar
+    bar = Bar()
     bars = Bars()
     bars.add(bar)
 
     # Boucle de jeu principale
     while True:
-        clock.tick(60)  # max speed is 60 frames per second
+        clock.tick(60)
 
         # IMPORTANT : pump de la connexion
         client.Loop()
@@ -189,7 +188,7 @@ def main():
             # On affiche un loader
             screen.blit(background_load, background_load_rect)
 
-        # IMPORTANT : C'est ça qui affiche à l'écran.
+        # IMPORTANT
         pygame.display.flip()
 
 

@@ -15,12 +15,11 @@ import outils
 """
 TODO
 - Chercher des images plus tard
-- Faire bouger les vaisseaux en même temps
 - Ajouter la balle et la gestion de mort en cas de sortie de l'écran.
 - Ajouter les briques et la gestion de rebond.
 - Ajouter la des monstres qui poppent via des briques speciales et de la mort de la barre adverse.
--
-- ... ?
+- Faire des briques spéciales (1-2-3 vies pour mourir, qui font pop des monstres, ...) --> Chercher du côté des
+Extends pour faire ça plus simplement ?
 """
 
 
@@ -180,25 +179,43 @@ class Ball(pygame.sprite.Sprite):
         collide_joueur2 = self.rect.move(self.speed).colliderect(bar2)
 
         if outils.COTE_GAUCHE >= self.rect.left:
+            # Collision mur gauche
             if self.direction == outils.HAUT:
-                self.reverse(outils.LEFT_UP)
+                print "Cas 1"
+                self.rect.left = outils.COTE_GAUCHE + 1
+                self.deplacement(outils.RIGHT_UP)
             else:
-                self.reverse(outils.LEFT_DOWN)
+                self.rect.left = outils.COTE_GAUCHE + 1
+                print "Cas 2"
+                self.deplacement(outils.RIGHT_DOWN)
         elif outils.COTE_DROIT <= self.rect.right:
+            # Collision mur droit
             if self.direction == outils.HAUT:
-                self.reverse(outils.RIGHT_UP)
+                print "Cas 3"
+                self.rect.right = outils.COTE_DROIT - 1
+                self.deplacement(outils.RIGHT_UP)
             else:
-                self.reverse(outils.RIGHT_DOWN)
+                print "Cas 4"
+                self.rect.right = outils.COTE_DROIT - 1
+                self.deplacement(outils.RIGHT_DOWN)
+        elif outils.COTE_HAUT >= self.rect.top:
+            print "Cas 10"
+            self.rect.top = outils.COTE_HAUT + 1
+            self.reverse()
+        elif outils.COTE_BAS <= self.rect.bottom:
+            print "Cas 11"
+            self.rect.bottom = outils.COTE_BAS - 1
+            self.reverse()
         elif collide_joueur1 == 0 and collide_joueur2 == 0:
-            self.rect = self.rect.move(self.speed)
+            print "Cas 5"
             # Pas de collision
+            self.rect = self.rect.move(self.speed)
         else:
-
+            # Collision avec une des deux bars
             if collide_joueur1 != 0:
                 self.direction = outils.BAS
                 # La balle a touché la barre du joueur 1
                 centerJoueur = bar1.rect.center
-                print "DATA JOUEUR 1"
                 leftJoueur = bar1.rect.left
                 rightJoueur = bar1.rect.right
 
@@ -206,62 +223,54 @@ class Ball(pygame.sprite.Sprite):
                 self.direction = outils.HAUT
                 # La balle a touché la barre du joueur 2
                 centerJoueur = bar2.rect.center
-                print "DATA JOUEUR 2"
                 leftJoueur = bar2.rect.left
                 rightJoueur = bar2.rect.right
 
-            print "Center : " + str(centerJoueur)
-            print "Left : " + str(leftJoueur)
-            print "Right : " + str(rightJoueur)
-
-            print "DATA BALLE"
-            print "Bottom : " + str(self.rect.bottom)
-            print "Center : " + str(self.rect.center)
-            print "Left : " + str(self.rect.left)
-            print "Right : " + str(self.rect.right)
             zoneRightMax = rightJoueur - outils.MARGE_ZONE
             zoneLeftMax = leftJoueur + outils.MARGE_ZONE
 
             if leftJoueur <= self.rect.center[0] <= zoneLeftMax:
-                print "ZONE gauche atteinte"
                 if collide_joueur1 != 0:
-                    print "ZONE Cas 1"
-                    self.reverse(outils.LEFT_DOWN)
+                    print "ZONE_GAUCHE Cas 1"
+                    self.deplacement(outils.LEFT_DOWN)
                 else:
-                    print "ZONE Cas 2"
-                    self.reverse(outils.LEFT_UP)
+                    print "ZONE_GAUCHE Cas 2"
+                    self.deplacement(outils.LEFT_UP)
 
             elif rightJoueur >= self.rect.center[0] >= zoneRightMax:
-                print "ZONE droite atteinte"
                 if collide_joueur1 != 0:
-                    self.reverse(outils.RIGHT_DOWN)
+                    print "ZONE_DROITE Cas 1"
+                    self.deplacement(outils.RIGHT_DOWN)
                 else:
-                    self.reverse(outils.RIGHT_UP)
+                    print "ZONE_DROITE Cas 2"
+                    self.deplacement(outils.RIGHT_UP)
 
             elif collide_joueur1 != 0:
-                self.reverse(outils.DOWN)
+                print "Cas 6"
+                self.deplacement(outils.DOWN)
             elif collide_joueur2 != 0:
-                self.reverse(outils.UP)
-            elif self.rect.left <= 0:
-                self.reverse(outils.RIGHT_UP)
-            elif self.rect.right >= outils.SCREEN_WIDTH:
-                self.reverse(outils.LEFT_DOWN)
+                print "Cas 7"
+                self.deplacement(outils.UP)
 
-    def reverse(self, direction):
+    def deplacement(self, direction):
         print "SPEED " + str(self.speed)
         print "DIRECTION " + str(direction)
         self.speed = direction
 
-        """
-        if int(self.speed[0]) == 0 and int(self.speed[1]) == outils.BALL_SPEED:
-            print "UP"
-            self.speed = outils.GOTO_UP
-        else:
-            print "DOWN"
-            self.speed = outils.GOTO_DOWN
-        """
+    def reverse(self):
+        print self.speed
 
-
+        self.speed = (-self.speed[0], -self.speed[1])
+        """
+        if self.speed == outils.RIGHT_UP:
+            self.deplacement(outils.RIGHT_DOWN)
+        elif self.speed == outils.RIGHT_DOWN:
+            self.deplacement(outils.RIGHT_UP)
+        elif self.speed == outils.LEFT_UP:
+            self.deplacement(outils.LEFT_DOWN)
+        elif self.speed == outils.LEFT_DOWN:
+            self.deplacement(outils.LEFT_UP)
+        """
 class MyServer(Server):
     channelClass = ClientChannel
 
@@ -332,7 +341,7 @@ class MyServer(Server):
     def collide_ball(self, balle, bar):
         if balle.rect.colliderect(bar.rect) or balle.rect.colliderect(bar.rect):
             print "Collision "
-            balle.reverse()
+            balle.deplacement()
             """if dx > 0: # Moving right; Hit the left side of the wall
                 self.rect.right = wall.rect.left
             if dx < 0: # Moving left; Hit the right side of the wall

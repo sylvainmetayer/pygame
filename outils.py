@@ -24,11 +24,14 @@ class Fonction():
             struct.pack('256s', ifname[:15])
         )[20:24])
 
-
+# Definitions des côtés de jeu
 SCREEN_WIDTH = 1024
 SCREEN_HEIGHT = 768
 COTE_GAUCHE = 0
 COTE_DROIT = SCREEN_WIDTH
+COTE_HAUT = 0
+COTE_BAS = SCREEN_HEIGHT
+
 
 SIZE_SERVEUR = ((SCREEN_WIDTH / 4, SCREEN_HEIGHT / 4))
 
