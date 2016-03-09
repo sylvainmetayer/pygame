@@ -10,25 +10,6 @@ from PodSixNet.Connection import connection, ConnectionListener
 import outils
 
 
-def load_png(name):
-    """
-    Permet de charger une image, via son nom.
-    :param name: le chemin de l'image à charger.
-    :return: l'image et le rectangle associé à l'image.
-    """
-    fullname = os.path.join('.', name)
-    try:
-        image = pygame.image.load(fullname)
-        if image.get_alpha is None:
-            image = image.convert()
-        else:
-            image = image.convert_alpha()
-    except pygame.error, message:
-        print 'Cannot load image:', fullname
-        raise SystemExit, message
-    return image, image.get_rect()
-
-
 class Bar(pygame.sprite.Sprite):
     '''
     Classe représentant la bar sur laquelle la balle rebondit
@@ -36,7 +17,7 @@ class Bar(pygame.sprite.Sprite):
 
     def __init__(self, center=(outils.SCREEN_WIDTH / 2, outils.SCREEN_HEIGHT / 2)):
         pygame.sprite.Sprite.__init__(self)
-        self.image, self.rect = load_png('images/bar.png')
+        self.image, self.rect = outils.Fonction.load_png('images/bar.png')
         self.rect.center = center
         self.speed = [3, 3]
         self.pas = 10
@@ -72,7 +53,7 @@ class Ball(pygame.sprite.Sprite, ConnectionListener):
 
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.image, self.rect = load_png('images/balle.png')
+        self.image, self.rect = outils.Fonction.load_png('images/balle.png')
         self.rect.center = outils.POS_BALLE
         # self.speed = [3, 3]
         # self.pas = 10
@@ -149,8 +130,8 @@ def main():
     pygame.key.set_repeat(1, 1)
 
     # Fond du jeu
-    background_image, background_rect = load_png('images/background.jpg')
-    background_load, background_load_rect = load_png("images/loading.jpg")
+    background_image, background_rect = outils.Fonction.load_png('images/background.jpg')
+    background_load, background_load_rect = outils.Fonction.load_png("images/loading.jpg")
 
     # Barre
     bar = Bar()

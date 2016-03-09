@@ -4,6 +4,8 @@
 # Ce fichier contient toutes les variables utilisées dans le jeu.
 
 import fcntl
+import os
+import pygame
 import socket
 import struct
 
@@ -23,6 +25,27 @@ class Fonction():
             0x8915,  # SIOCGIFADDR
             struct.pack('256s', ifname[:15])
         )[20:24])
+
+    @staticmethod
+    def load_png(name):
+        """
+        Permet de charger une image, via son nom.
+        :param name: le chemin de l'image à charger.
+        :return: l'image et le rectangle associé à l'image.
+        """
+        fullname = os.path.join('.', name)
+        try:
+            image = pygame.image.load(fullname)
+            if image.get_alpha is None:
+                image = image.convert()
+            else:
+                image = image.convert_alpha()
+        except pygame.error, message:
+            print 'Cannot load image:', fullname
+            raise SystemExit, message
+        return image, image.get_rect()
+
+
 
 # Definitions des côtés de jeu
 SCREEN_WIDTH = 1024

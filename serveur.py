@@ -259,7 +259,6 @@ class Ball(pygame.sprite.Sprite):
 
     def reverse(self):
         print self.speed
-        
         if self.speed == outils.RIGHT_UP:
             self.deplacement(outils.RIGHT_DOWN)
         elif self.speed == outils.RIGHT_DOWN:
