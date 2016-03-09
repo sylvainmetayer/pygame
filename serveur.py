@@ -259,9 +259,7 @@ class Ball(pygame.sprite.Sprite):
 
     def reverse(self):
         print self.speed
-
-        self.speed = (-self.speed[0], -self.speed[1])
-        """
+        
         if self.speed == outils.RIGHT_UP:
             self.deplacement(outils.RIGHT_DOWN)
         elif self.speed == outils.RIGHT_DOWN:
@@ -270,7 +268,8 @@ class Ball(pygame.sprite.Sprite):
             self.deplacement(outils.LEFT_DOWN)
         elif self.speed == outils.LEFT_DOWN:
             self.deplacement(outils.LEFT_UP)
-        """
+
+
 class MyServer(Server):
     channelClass = ClientChannel
 
