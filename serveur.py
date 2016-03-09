@@ -193,11 +193,11 @@ class Ball(pygame.sprite.Sprite):
             if self.direction == outils.HAUT:
                 print "Cas 3"
                 self.rect.right = outils.COTE_DROIT - 1
-                self.deplacement(outils.RIGHT_UP)
+                self.deplacement(outils.LEFT_UP)
             else:
                 print "Cas 4"
                 self.rect.right = outils.COTE_DROIT - 1
-                self.deplacement(outils.RIGHT_DOWN)
+                self.deplacement(outils.LEFT_DOWN)
         elif outils.COTE_HAUT >= self.rect.top:
             print "Cas 10"
             self.rect.top = outils.COTE_HAUT + 1
