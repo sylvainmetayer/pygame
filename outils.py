@@ -80,6 +80,10 @@ RIGHT_UP = [BALL_SPEED, -BALL_SPEED]
 
 POS_BALLE = [SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2]
 
+
+# LEs briques
+NB_VIE_BRIQUE_0 = 2
+
 """
  Configuration par défaut (utilisation locale) :
     Port 8888

@@ -1,7 +1,6 @@
 #!/usr/bin/python2
 # -*- coding: utf-8 -*-
 
-import os
 import pygame
 import sys
 
@@ -25,6 +24,19 @@ class Bar(pygame.sprite.Sprite):
     def update(self):
         pass
 
+class Brique(pygame.sprite.Sprite):
+    """
+    Classe qui réprésente une brique normale
+    Cette classe à 2 vies.
+    """
+
+    def __init__(self, position):
+        pygame.sprite.Sprite.__init__(self)
+        self.image, self.rect = outils.Fonction.load_png("images/brique_0.png")
+        self.rect.center = position
+
+    def update(self):
+        pass
 
 class Bars(pygame.sprite.Group, ConnectionListener):
     """
@@ -44,6 +56,29 @@ class Bars(pygame.sprite.Group, ConnectionListener):
         for xy in donnees:
             bar = Bar(xy)
             self.add(bar)
+
+class Briques(pygame.sprite.RenderClear, ConnectionListener):
+    """
+    Classe qui contient un tableau de briques
+    """
+
+    def __init__(self):
+        pygame.sprite.Group.__init__(self)
+
+    def __getitem__(self, item):
+        for key, value in enumerate(self.sprites()):
+            if key == item:
+                return value
+
+    def update(self):
+        self.Pump()
+
+    def Network_briques(self, data):
+        self.empty()
+        donnees = data["liste"]
+        for xy in donnees:
+            brique = Brique(xy)
+            self.add(brique)
 
 
 class Ball(pygame.sprite.Sprite, ConnectionListener):
@@ -68,6 +103,8 @@ class Ball(pygame.sprite.Sprite, ConnectionListener):
     '''
     Classe représentant une brique à casser
     '''
+
+
 
 
 class Client(ConnectionListener):
@@ -137,6 +174,8 @@ def main():
     bar = Bar()
     bars = Bars()
     bars.add(bar)
+    briques = Briques()
+
 
     # Boucle de jeu principale
     while True:
@@ -146,6 +185,7 @@ def main():
         client.Loop()
         bars.update()
         balle.update()
+        briques.update()
 
         # Pour quitter
         for event in pygame.event.get():
@@ -163,8 +203,11 @@ def main():
 
             # On dessine
             screen.blit(background_image, background_rect)
-            bars.draw(screen)
             screen.blit(balle.image, balle.rect)
+            bars.draw(screen)
+            briques.draw(screen)
+
+
         else:
             # On affiche un loader
             screen.blit(background_load, background_load_rect)

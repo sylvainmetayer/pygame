@@ -1,7 +1,6 @@
 #!/usr/bin/python2
 # -*- coding: utf-8 -*-
 
-import os
 import pygame
 import sys
 import time
@@ -14,32 +13,11 @@ import outils
 
 """
 TODO
-- Chercher des images plus tard
 - Ajouter la balle et la gestion de mort en cas de sortie de l'écran.
-- Ajouter les briques et la gestion de rebond.
 - Ajouter la des monstres qui poppent via des briques speciales et de la mort de la barre adverse.
 - Faire des briques spéciales (1-2-3 vies pour mourir, qui font pop des monstres, ...) --> Chercher du côté des
 Extends pour faire ça plus simplement ?
 """
-
-
-def load_png(name):
-    """
-    Permet de charger une image, via son nom.
-    :param name: le chemin de l'image à charger.
-    :return: l'image et le rectangle associé à l'image.
-    """
-    fullname = os.path.join('.', name)
-    try:
-        image = pygame.image.load(fullname)
-        if image.get_alpha is None:
-            image = image.convert()
-        else:
-            image = image.convert_alpha()
-    except pygame.error, message:
-        print 'Cannot load image:', fullname
-        raise SystemExit, message
-    return image, image.get_rect()
 
 
 class Bar(pygame.sprite.Sprite):
@@ -50,7 +28,7 @@ class Bar(pygame.sprite.Sprite):
 
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.image, self.rect = load_png('images/bar.png')
+        self.image, self.rect = outils.Fonction.load_png('images/bar.png')
 
         # Position de départ
         self.rect.center = [outils.SCREEN_WIDTH / 2, outils.SCREEN_HEIGHT / 2]
@@ -107,7 +85,6 @@ class Bars(pygame.sprite.RenderClear):
                 return value
 
 
-# TODO Le Sprite qui n'a rien a foutre la, mais qui fait fonctionner le jeu en multi :D
 class ClientChannel(Channel, pygame.sprite.Sprite):
     """
     Cette classe gère un client, qui se connecte au serveur, et lui attribue un bar.
@@ -145,6 +122,72 @@ class ClientChannel(Channel, pygame.sprite.Sprite):
     def get_bar(self):
         return self.bar
 
+class Brique(pygame.sprite.Sprite):
+    """
+    Classe qui réprésente une brique normale
+    Cette classe à 2 vies.
+    """
+
+    def __init__(self, position):
+        pygame.sprite.Sprite.__init__(self)
+        self.image, self.rect = outils.Fonction.load_png("images/brique_0.png")
+        self.rect.center = position
+        self.vie = outils.NB_VIE_BRIQUE_0
+
+    def hit(self):
+        self.vie -= 1
+        if self.vie == 0:
+            self.kill()
+
+    def gestion(self, balle):
+        if self.rect.colliderect(balle.rect):
+            self.hit()
+            if self.rect.center[0] >= balle.rect.center[0] and self.rect.center[1] <= balle.rect.center[1] :
+                # Coté gauche
+                if balle.speed == outils.RIGHT_UP:
+                    balle.deplacement(outils.LEFT_UP)
+                else:
+                    balle.deplacement(outils.LEFT_DOWN)
+            elif self.rect.center[1] >= balle.rect.center[1] and self.rect.center[0] <= balle.rect.center[0]:
+                # Côté droit
+                if balle.speed == outils.LEFT_UP:
+                    balle.deplacement(outils.RIGHT_UP)
+                else:
+                    balle.deplacement(outils.RIGHT_DOWN)
+            elif self.rect.center[0] <= balle.rect.center[0] and self.rect.center[1] <= balle.rect.center[1]:
+                # Cote haut
+                if balle.speed == outils.RIGHT_DOWN:
+                    balle.deplacement(outils.RIGHT_UP)
+                else:
+                    balle.deplacement(outils.LEFT_UP)
+            elif self.rect.center[0] >= balle.rect.center[0] and self.rect.center[1] >= balle.rect.center[1]:
+                # Cote bas
+                if balle.speed == outils.RIGHT_UP:
+                    balle.deplacement(outils.RIGHT_DOWN)
+                else:
+                    balle.deplacement(outils.LEFT_DOWN)
+            return True
+        return False
+
+class Briques(pygame.sprite.RenderClear):
+    """
+    Classe qui contient un tableau de briques
+    """
+
+    def __init__(self):
+        pygame.sprite.Group.__init__(self)
+
+    def __getitem__(self, item):
+        for key, value in enumerate(self.sprites()):
+            if key == item:
+                return value
+    def gestion(self, balle):
+        for brique in self.sprites():
+            hit = brique.gestion(balle)
+            if hit:
+                return True
+
+        return False
 
 class Ball(pygame.sprite.Sprite):
     """
@@ -153,7 +196,7 @@ class Ball(pygame.sprite.Sprite):
 
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.image, self.rect = load_png('images/balle.png')
+        self.image, self.rect = outils.Fonction.load_png('images/balle.png')
         self.rect.center = outils.POS_BALLE
         self.speed = [0, outils.BALL_SPEED]
         self.pas = 10
@@ -175,6 +218,7 @@ class Ball(pygame.sprite.Sprite):
         :param bar2: Joueur 2
         :return:
         """
+
         collide_joueur1 = self.rect.move(self.speed).colliderect(bar1)
         collide_joueur2 = self.rect.move(self.speed).colliderect(bar2)
 
@@ -276,6 +320,12 @@ class MyServer(Server):
         Server.__init__(self, *args, **kwargs)
         pygame.display.set_caption("Server")
         self.screen = pygame.display.set_mode(outils.SIZE_SERVEUR)
+
+        # TODO temporaire gestion dynamique a faire
+        self.briques = Briques()
+        for i in range(100,500,50):
+            self.brique = Brique((600, i))
+            self.briques.add(self.brique)
         self.clients = Bars()
         self.balle = Ball()
         # self.run = False
@@ -300,7 +350,9 @@ class MyServer(Server):
             client.update_bar()
 
     def update_balle(self):
-        self.balle.update(self.clients.__getitem__(outils.J1).get_bar(), self.clients.__getitem__(outils.J2).get_bar())
+        isBriqueHit = self.briques.gestion(self.balle)
+        if not(isBriqueHit):
+            self.balle.update(self.clients.__getitem__(outils.J1).get_bar(), self.clients.__getitem__(outils.J2).get_bar())
 
     def get_positions_bars(self):
         """
@@ -310,6 +362,16 @@ class MyServer(Server):
         for client in self.clients:
             liste.append(client.bar.rect.center)
         return liste
+
+    def get_positions_briques(self):
+        liste = []
+        for brique in self.briques:
+            liste.append(brique.rect.center)
+        return liste
+
+    def send_briques(self):
+        for client in self.clients:
+            client.Send({"action" : "briques", "liste":self.get_positions_briques()})
 
     def send_bar(self):
         for client in self.clients:
@@ -351,8 +413,8 @@ class MyServer(Server):
 
     def launch_game(self):
         screen = self.screen
-        background_image, background_rect = load_png('images/background.jpg')
-        background_load, background_load_rect = load_png("images/loading_mini.gif")
+        background_image, background_rect = outils.Fonction.load_png('images/background.jpg')
+        background_load, background_load_rect = outils.Fonction.load_png("images/loading_mini.gif")
         clock = pygame.time.Clock()
 
         # Petit Timer pour eviter un début du jeu trop brutal
@@ -377,6 +439,7 @@ class MyServer(Server):
                 self.update_balle()
                 self.send_bar()
                 self.send_balle()
+                self.send_briques()
 
                 # collisions joueur 1 avec la balle
                 # self.collide_ball(self.balle, self.clients.__getitem__(outils.J1).get_bar())
