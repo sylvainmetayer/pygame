@@ -10,80 +10,16 @@ from PodSixNet.Channel import Channel
 from PodSixNet.Server import Server
 
 import outils
+from Balle import Ball
+from Bar import Bar, Bars
+from Brique import Briques, Brique
 
 """
 TODO
 - Ajouter la balle et la gestion de mort en cas de sortie de l'écran.
 - Ajouter la des monstres qui poppent via des briques speciales et de la mort de la barre adverse.
-- Faire des briques spéciales (1-2-3 vies pour mourir, qui font pop des monstres, ...) --> Chercher du côté des
-Extends pour faire ça plus simplement ?
+- Faire des briques spéciales (1-2-3 vies pour mourir, qui font pop des monstres, ...)
 """
-
-
-class Bar(pygame.sprite.Sprite):
-    """
-    Classe représentant la barre d'un joueur, côté serveur.
-    Attribut : une image, une position (le rect de l'image) et une vitesse.
-    """
-
-    def __init__(self):
-        pygame.sprite.Sprite.__init__(self)
-        self.image, self.rect = outils.Fonction.load_png('images/bar.png')
-
-        # Position de départ
-        self.rect.center = [outils.SCREEN_WIDTH / 2, outils.SCREEN_HEIGHT / 2]
-
-        self.speed = [3, 3]
-        self.pas = 10  # Vitesse de déplacement
-
-    def left(self):
-        if self.rect.left <= 0:
-            self.rect = self.rect.move([0, 0])
-        else:
-            self.rect = self.rect.move([-self.pas, 0])
-
-    def right(self):
-        if self.rect.right >= outils.SCREEN_WIDTH:
-            self.rect = self.rect.move([0, 0])
-        else:
-            self.rect = self.rect.move([self.pas, 0])
-
-    def update(self):
-
-        # On gère que la vitesse ne soit pas trop élevée.
-        if self.speed[0] >= 5 or self.speed[0] >= -5:
-            self.speed[0] = 0
-        if self.speed[1] >= 5 or self.speed[1] >= -5:
-            self.speed[1] = 0
-
-        self.rect = self.rect.move(self.speed)
-
-    def set_position(self, position):
-        """
-        Cette fonction permet de définir la position de départ. Elle est normalement uniquement utilisée
-        lors de l'instanciation de joueurs
-        :param position: tuple de la position
-        """
-        self.rect.center = position
-
-
-class Bars(pygame.sprite.RenderClear):
-    """
-    Classe qui contient un tableau de clients de bar
-    """
-
-    def __init__(self):
-        pygame.sprite.Group.__init__(self)
-
-    def update(self):
-        for client in self.sprites():
-            client.bar.update()
-
-    def __getitem__(self, item):
-        for key, value in enumerate(self.sprites()):
-            if key == item:
-                return value
-
 
 class ClientChannel(Channel, pygame.sprite.Sprite):
     """
@@ -121,196 +57,6 @@ class ClientChannel(Channel, pygame.sprite.Sprite):
 
     def get_bar(self):
         return self.bar
-
-class Brique(pygame.sprite.Sprite):
-    """
-    Classe qui réprésente une brique normale
-    Cette classe à 2 vies.
-    """
-
-    def __init__(self, position):
-        pygame.sprite.Sprite.__init__(self)
-        self.image, self.rect = outils.Fonction.load_png("images/brique_0.png")
-        self.rect.center = position
-        self.vie = outils.NB_VIE_BRIQUE_0
-
-    def hit(self):
-        self.vie -= 1
-        if self.vie == 0:
-            self.kill()
-
-    def gestion(self, balle):
-        if self.rect.colliderect(balle.rect):
-            self.hit()
-            if self.rect.center[0] >= balle.rect.center[0] and self.rect.center[1] <= balle.rect.center[1] :
-                # Coté gauche
-                if balle.speed == outils.RIGHT_UP:
-                    balle.deplacement(outils.LEFT_UP)
-                else:
-                    balle.deplacement(outils.LEFT_DOWN)
-            elif self.rect.center[1] >= balle.rect.center[1] and self.rect.center[0] <= balle.rect.center[0]:
-                # Côté droit
-                if balle.speed == outils.LEFT_UP:
-                    balle.deplacement(outils.RIGHT_UP)
-                else:
-                    balle.deplacement(outils.RIGHT_DOWN)
-            elif self.rect.center[0] <= balle.rect.center[0] and self.rect.center[1] <= balle.rect.center[1]:
-                # Cote haut
-                if balle.speed == outils.RIGHT_DOWN:
-                    balle.deplacement(outils.RIGHT_UP)
-                else:
-                    balle.deplacement(outils.LEFT_UP)
-            elif self.rect.center[0] >= balle.rect.center[0] and self.rect.center[1] >= balle.rect.center[1]:
-                # Cote bas
-                if balle.speed == outils.RIGHT_UP:
-                    balle.deplacement(outils.RIGHT_DOWN)
-                else:
-                    balle.deplacement(outils.LEFT_DOWN)
-            return True
-        return False
-
-class Briques(pygame.sprite.RenderClear):
-    """
-    Classe qui contient un tableau de briques
-    """
-
-    def __init__(self):
-        pygame.sprite.Group.__init__(self)
-
-    def __getitem__(self, item):
-        for key, value in enumerate(self.sprites()):
-            if key == item:
-                return value
-    def gestion(self, balle):
-        for brique in self.sprites():
-            hit = brique.gestion(balle)
-            if hit:
-                return True
-
-        return False
-
-class Ball(pygame.sprite.Sprite):
-    """
-    Classe représentant la bille du jeu côté serveur
-    """
-
-    def __init__(self):
-        pygame.sprite.Sprite.__init__(self)
-        self.image, self.rect = outils.Fonction.load_png('images/balle.png')
-        self.rect.center = outils.POS_BALLE
-        self.speed = [0, outils.BALL_SPEED]
-        self.pas = 10
-        self.direction = outils.BAS
-
-    def Network_ball(self, data):
-        self.rect.center = data['center']
-
-    def isPointInsideRect(x, y, rect):
-        if (x > rect.left) and (x < rect.right) and (y > rect.top) and (y < rect.bottom):
-            return True
-        else:
-            return False
-
-    def update(self, bar1, bar2):
-        """
-        Cette fonction permet de gérer le déplacement de la balle, et les collisions avec les deux bars
-        :param bar1: Joueur 1
-        :param bar2: Joueur 2
-        :return:
-        """
-
-        collide_joueur1 = self.rect.move(self.speed).colliderect(bar1)
-        collide_joueur2 = self.rect.move(self.speed).colliderect(bar2)
-
-        if outils.COTE_GAUCHE >= self.rect.left:
-            # Collision mur gauche
-            if self.direction == outils.HAUT:
-                print "Cas 1"
-                self.rect.left = outils.COTE_GAUCHE + 1
-                self.deplacement(outils.RIGHT_UP)
-            else:
-                self.rect.left = outils.COTE_GAUCHE + 1
-                print "Cas 2"
-                self.deplacement(outils.RIGHT_DOWN)
-        elif outils.COTE_DROIT <= self.rect.right:
-            # Collision mur droit
-            if self.direction == outils.HAUT:
-                print "Cas 3"
-                self.rect.right = outils.COTE_DROIT - 1
-                self.deplacement(outils.LEFT_UP)
-            else:
-                print "Cas 4"
-                self.rect.right = outils.COTE_DROIT - 1
-                self.deplacement(outils.LEFT_DOWN)
-        elif outils.COTE_HAUT >= self.rect.top:
-            print "Cas 10"
-            self.rect.top = outils.COTE_HAUT + 1
-            self.reverse()
-        elif outils.COTE_BAS <= self.rect.bottom:
-            print "Cas 11"
-            self.rect.bottom = outils.COTE_BAS - 1
-            self.reverse()
-        elif collide_joueur1 == 0 and collide_joueur2 == 0:
-            print "Cas 5"
-            # Pas de collision
-            self.rect = self.rect.move(self.speed)
-        else:
-            # Collision avec une des deux bars
-            if collide_joueur1 != 0:
-                self.direction = outils.BAS
-                # La balle a touché la barre du joueur 1
-                centerJoueur = bar1.rect.center
-                leftJoueur = bar1.rect.left
-                rightJoueur = bar1.rect.right
-
-            if collide_joueur2 != 0:
-                self.direction = outils.HAUT
-                # La balle a touché la barre du joueur 2
-                centerJoueur = bar2.rect.center
-                leftJoueur = bar2.rect.left
-                rightJoueur = bar2.rect.right
-
-            zoneRightMax = rightJoueur - outils.MARGE_ZONE
-            zoneLeftMax = leftJoueur + outils.MARGE_ZONE
-
-            if leftJoueur <= self.rect.center[0] <= zoneLeftMax:
-                if collide_joueur1 != 0:
-                    print "ZONE_GAUCHE Cas 1"
-                    self.deplacement(outils.LEFT_DOWN)
-                else:
-                    print "ZONE_GAUCHE Cas 2"
-                    self.deplacement(outils.LEFT_UP)
-
-            elif rightJoueur >= self.rect.center[0] >= zoneRightMax:
-                if collide_joueur1 != 0:
-                    print "ZONE_DROITE Cas 1"
-                    self.deplacement(outils.RIGHT_DOWN)
-                else:
-                    print "ZONE_DROITE Cas 2"
-                    self.deplacement(outils.RIGHT_UP)
-
-            elif collide_joueur1 != 0:
-                print "Cas 6"
-                self.deplacement(outils.DOWN)
-            elif collide_joueur2 != 0:
-                print "Cas 7"
-                self.deplacement(outils.UP)
-
-    def deplacement(self, direction):
-        print "SPEED " + str(self.speed)
-        print "DIRECTION " + str(direction)
-        self.speed = direction
-
-    def reverse(self):
-        print self.speed
-        if self.speed == outils.RIGHT_UP:
-            self.deplacement(outils.RIGHT_DOWN)
-        elif self.speed == outils.RIGHT_DOWN:
-            self.deplacement(outils.RIGHT_UP)
-        elif self.speed == outils.LEFT_UP:
-            self.deplacement(outils.LEFT_DOWN)
-        elif self.speed == outils.LEFT_DOWN:
-            self.deplacement(outils.LEFT_UP)
 
 
 class MyServer(Server):
@@ -402,14 +148,10 @@ class MyServer(Server):
         if balle.rect.colliderect(bar.rect) or balle.rect.colliderect(bar.rect):
             print "Collision "
             balle.deplacement()
-            """if dx > 0: # Moving right; Hit the left side of the wall
-                self.rect.right = wall.rect.left
-            if dx < 0: # Moving left; Hit the right side of the wall
-                self.rect.left = wall.rect.right
-            if dy > 0: # Moving down; Hit the top side of the wall
-                self.rect.bottom = wall.rect.top
-            if dy < 0: # Moving up; Hit the bottom side of the wall
-                self.rect.top = wall.rect.bottom"""
+
+    def del_client(self, channel):
+        print('DISCONNECTED client')
+        self.clients.remove(channel)
 
     def launch_game(self):
         screen = self.screen
@@ -452,17 +194,8 @@ class MyServer(Server):
             # On dessine
             pygame.display.flip()
 
-    def del_client(self, channel):
-        print('DISCONNECTED client')
-        self.clients.remove(channel)
-
 
 def main_prog():
-    """
-    Cette fonction crée le serveur et lance le jeu
-    :return:
-    """
-
     if len(sys.argv) == 2:
         port = sys.argv[2]
         ip = sys.argv[1]
@@ -473,10 +206,6 @@ def main_prog():
     print "IP : " + ip + "\tPort : " + str(port)
     my_server = MyServer(localaddr=(ip, int(port)))
     my_server.launch_game()
-
-
-if len(sys.argv) != 3:
-    print "Usage:", sys.argv[0], "[host] [port]"
 
 if __name__ == '__main__':
     main_prog()
