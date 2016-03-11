@@ -2,8 +2,11 @@
 # -*- coding: utf-8 -*-
 
 import pygame.sprite
-from PodSixNet.Connection import connection, ConnectionListener
+
+from PodSixNet.Connection import ConnectionListener
+
 import outils
+
 
 # Partie Serveur
 
