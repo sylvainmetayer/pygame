@@ -2,8 +2,13 @@
 # -*- coding: utf-8 -*-
 
 import pygame.sprite
+
+from PodSixNet.Connection import ConnectionListener
+
 import outils
 
+
+# PARTIE SERVEUR
 
 class Brique(pygame.sprite.Sprite):
     """
@@ -71,3 +76,43 @@ class Briques(pygame.sprite.RenderClear):
                 return True
 
         return False
+
+# PARTIE CLIENT
+
+class BriqueClient(pygame.sprite.Sprite):
+    """
+    Classe qui réprésente une brique normale
+    Cette classe à 2 vies.
+    """
+
+    def __init__(self, position):
+        pygame.sprite.Sprite.__init__(self)
+        self.image, self.rect = outils.Fonction.load_png("images/brique_0.png")
+        self.rect.center = position
+
+    def update(self):
+        pass
+
+
+class BriquesClient(pygame.sprite.RenderClear, ConnectionListener):
+    """
+    Classe qui contient un tableau de briques
+    """
+
+    def __init__(self):
+        pygame.sprite.Group.__init__(self)
+
+    def __getitem__(self, item):
+        for key, value in enumerate(self.sprites()):
+            if key == item:
+                return value
+
+    def update(self):
+        self.Pump()
+
+    def Network_briques(self, data):
+        self.empty()
+        donnees = data["liste"]
+        for xy in donnees:
+            brique = BriqueClient(xy)
+            self.add(brique)

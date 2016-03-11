@@ -2,7 +2,10 @@
 # -*- coding: utf-8 -*-
 
 import pygame.sprite
+from PodSixNet.Connection import connection, ConnectionListener
 import outils
+
+# Partie Serveur
 
 class Bar(pygame.sprite.Sprite):
     """
@@ -67,3 +70,40 @@ class Bars(pygame.sprite.RenderClear):
         for key, value in enumerate(self.sprites()):
             if key == item:
                 return value
+
+
+# PARTIE CLIENT
+
+class BarClient(pygame.sprite.Sprite):
+    '''
+    Classe représentant la bar sur laquelle la balle rebondit
+    '''
+
+    def __init__(self, center=(outils.SCREEN_WIDTH / 2, outils.SCREEN_HEIGHT / 2)):
+        pygame.sprite.Sprite.__init__(self)
+        self.image, self.rect = outils.Fonction.load_png('images/bar.png')
+        self.rect.center = center
+        self.speed = [3, 3]
+        self.pas = 10
+
+    def update(self):
+        pass
+
+class BarsClient(pygame.sprite.Group, ConnectionListener):
+    """
+    Classe de groupe de tirs côté client.
+    """
+
+    def __init__(self):
+        pygame.sprite.Group.__init__(self)
+
+    def update(self):
+        self.Pump()
+
+    def Network_bar(self, data):
+        self.empty()
+        donnees = data["liste"]
+        # print data
+        for xy in donnees:
+            bar = BarClient(xy)
+            self.add(bar)

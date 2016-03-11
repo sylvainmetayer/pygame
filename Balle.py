@@ -3,8 +3,11 @@
 
 import pygame.sprite
 
+from PodSixNet.Connection import ConnectionListener
+
 import outils
 
+# PARTIE SERVEUR
 
 class Ball(pygame.sprite.Sprite):
     """
@@ -129,3 +132,23 @@ class Ball(pygame.sprite.Sprite):
         elif self.speed == outils.LEFT_DOWN:
             self.deplacement(outils.LEFT_UP)
 
+
+# PARTIE CLIENT
+
+class BallClient(pygame.sprite.Sprite, ConnectionListener):
+    '''
+    Classe représentant la bille du jeu
+    '''
+
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image, self.rect = outils.Fonction.load_png('images/balle.png')
+        self.rect.center = outils.POS_BALLE
+        # self.speed = [3, 3]
+        # self.pas = 10
+
+    def Network_balle(self, data):
+        self.rect.center = data['center']
+
+    def update(self):
+        self.Pump()

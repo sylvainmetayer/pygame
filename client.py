@@ -7,104 +7,9 @@ import sys
 from PodSixNet.Connection import connection, ConnectionListener
 
 import outils
-
-
-class Bar(pygame.sprite.Sprite):
-    '''
-    Classe représentant la bar sur laquelle la balle rebondit
-    '''
-
-    def __init__(self, center=(outils.SCREEN_WIDTH / 2, outils.SCREEN_HEIGHT / 2)):
-        pygame.sprite.Sprite.__init__(self)
-        self.image, self.rect = outils.Fonction.load_png('images/bar.png')
-        self.rect.center = center
-        self.speed = [3, 3]
-        self.pas = 10
-
-    def update(self):
-        pass
-
-class Brique(pygame.sprite.Sprite):
-    """
-    Classe qui réprésente une brique normale
-    Cette classe à 2 vies.
-    """
-
-    def __init__(self, position):
-        pygame.sprite.Sprite.__init__(self)
-        self.image, self.rect = outils.Fonction.load_png("images/brique_0.png")
-        self.rect.center = position
-
-    def update(self):
-        pass
-
-class Bars(pygame.sprite.Group, ConnectionListener):
-    """
-    Classe de groupe de tirs côté client.
-    """
-
-    def __init__(self):
-        pygame.sprite.Group.__init__(self)
-
-    def update(self):
-        self.Pump()
-
-    def Network_bar(self, data):
-        self.empty()
-        donnees = data["liste"]
-        # print data
-        for xy in donnees:
-            bar = Bar(xy)
-            self.add(bar)
-
-class Briques(pygame.sprite.RenderClear, ConnectionListener):
-    """
-    Classe qui contient un tableau de briques
-    """
-
-    def __init__(self):
-        pygame.sprite.Group.__init__(self)
-
-    def __getitem__(self, item):
-        for key, value in enumerate(self.sprites()):
-            if key == item:
-                return value
-
-    def update(self):
-        self.Pump()
-
-    def Network_briques(self, data):
-        self.empty()
-        donnees = data["liste"]
-        for xy in donnees:
-            brique = Brique(xy)
-            self.add(brique)
-
-
-class Ball(pygame.sprite.Sprite, ConnectionListener):
-    '''
-    Classe représentant la bille du jeu
-    '''
-
-    def __init__(self):
-        pygame.sprite.Sprite.__init__(self)
-        self.image, self.rect = outils.Fonction.load_png('images/balle.png')
-        self.rect.center = outils.POS_BALLE
-        # self.speed = [3, 3]
-        # self.pas = 10
-
-    def Network_balle(self, data):
-        self.rect.center = data['center']
-
-    def update(self):
-        self.Pump()
-
-    # class Brick(pygame.sprite.Sprite, ConnectionListener):
-    '''
-    Classe représentant une brique à casser
-    '''
-
-
+from Balle import BallClient
+from Bar import BarClient, BarsClient
+from Brique import BriquesClient
 
 
 class Client(ConnectionListener):
@@ -142,12 +47,6 @@ def main():
     # Initialisation de l'écran
     screen = pygame.display.set_mode((outils.SCREEN_WIDTH, outils.SCREEN_HEIGHT))
 
-    """
-    Récupération IP / PORT :
-        - de la ligne de commande
-        OU
-        - du fichier de configuration
-    """
     if len(sys.argv) == 2:
         port = sys.argv[2]
         ip = sys.argv[1]
@@ -157,7 +56,7 @@ def main():
 
     # Instanciation des composants du jeu.
     client = Client(ip, int(port))
-    balle = Ball()
+    balle = BallClient()
 
     # Initialisation Pygame
     pygame.init()
@@ -171,10 +70,10 @@ def main():
     background_load, background_load_rect = outils.Fonction.load_png("images/loading.jpg")
 
     # Barre
-    bar = Bar()
-    bars = Bars()
+    bar = BarClient()
+    bars = BarsClient()
     bars.add(bar)
-    briques = Briques()
+    briques = BriquesClient()
 
 
     # Boucle de jeu principale
@@ -206,7 +105,6 @@ def main():
             screen.blit(balle.image, balle.rect)
             bars.draw(screen)
             briques.draw(screen)
-
 
         else:
             # On affiche un loader
