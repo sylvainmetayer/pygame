@@ -106,7 +106,6 @@ class BarsClient(pygame.sprite.Group, ConnectionListener):
     def Network_bar(self, data):
         self.empty()
         donnees = data["liste"]
-        # print data
         for xy in donnees:
             bar = BarClient(xy)
             self.add(bar)

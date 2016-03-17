@@ -3,7 +3,7 @@
 
 
 BALL_SPEED = 3
-NB_VIE_BRIQUE_0 = 2
+NB_VIE_BRIQUE_0 = 3
 ALLOW_SOUND = True
 PORT = 8888
 ETH = "wlan0"

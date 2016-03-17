@@ -79,7 +79,6 @@ class MyServer(Server):
         pygame.init()
 
     def Connected(self, channel, addr):
-        print "Client Connecte !"
         self.clients.add(channel)
         if len(self.clients) == 1:
             clientTmp = self.clients.__getitem__(outils.J1)
@@ -173,12 +172,10 @@ class MyServer(Server):
 
     def collide_ball(self, balle, bar):
         if balle.rect.colliderect(bar.rect) or balle.rect.colliderect(bar.rect):
-            print "Collision "
             self.send_info("sound_bound", "bound")
             balle.deplacement()
 
     def del_client(self, channel):
-        print('DISCONNECTED client')
         self.clients.remove(channel)
 
     def launch_game(self):

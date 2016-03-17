@@ -22,9 +22,11 @@ class Client(ConnectionListener):
         connection.Pump()
         self.Pump()
 
+
     def Network(self, data):
         # ('message de type %s recu' % data['action'])
-        print data
+        pass
+
 
     def Network_info(self, data):
         message = data["message"];
@@ -125,8 +127,6 @@ def main():
                 bars.draw(screen)
                 briques.draw(screen)
         else:
-            print str(client.end)
-
             screen.blit(background_load, background_load_rect)
 
         # IMPORTANT
