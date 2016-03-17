@@ -31,7 +31,8 @@ class Brique(pygame.sprite.Sprite):
         if self.rect.colliderect(balle.rect):
             self.hit()
             if self.rect.center[0] >= balle.rect.center[0] and self.rect.center[1] <= balle.rect.center[1] :
-                balle.rect.right = self.rect.left - 5
+                print "Recentrer balle à gauche de la brique"
+                balle.rect.right = self.rect.left - 50
                 # Coté gauche
                 if balle.speed == outils.RIGHT_UP:
                     balle.deplacement(outils.LEFT_UP)
@@ -39,21 +40,24 @@ class Brique(pygame.sprite.Sprite):
                     balle.deplacement(outils.LEFT_DOWN)
             elif self.rect.center[1] >= balle.rect.center[1] and self.rect.center[0] <= balle.rect.center[0]:
                 # Côté droit
-                balle.rect.left = self.rect.right + 5
+                print "Recentrer balle à droite de la brique"
+                balle.rect.left = self.rect.right + 50
                 if balle.speed == outils.LEFT_UP:
                     balle.deplacement(outils.RIGHT_UP)
                 else:
                     balle.deplacement(outils.RIGHT_DOWN)
             elif self.rect.center[0] <= balle.rect.center[0] and self.rect.center[1] <= balle.rect.center[1]:
                 # Cote haut
-                balle.rect.bottom = self.rect.top - 5
+                print "Recentrer balle en bas de la brique"
+                balle.rect.bottom = self.rect.top - 50
                 if balle.speed == outils.RIGHT_DOWN or balle.speed == outils.LEFT_DOWN:
                     balle.deplacement(outils.RIGHT_UP)
                 else:
                     balle.deplacement(outils.LEFT_UP)
             elif self.rect.center[0] >= balle.rect.center[0] and self.rect.center[1] >= balle.rect.center[1]:
                 # Cote bas
-                balle.rect.top = self.rect.bottom + 5
+                print "Recentrer balle en haut de la brique"
+                balle.rect.top = self.rect.bottom + 50
                 if balle.speed == outils.RIGHT_UP:
                     balle.deplacement(outils.RIGHT_DOWN)
                 else:
