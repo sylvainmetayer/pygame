@@ -46,14 +46,14 @@ class Brique(pygame.sprite.Sprite):
                     balle.deplacement(outils.RIGHT_DOWN)
             elif self.rect.center[0] <= balle.rect.center[0] and self.rect.center[1] <= balle.rect.center[1]:
                 # Cote haut
-                balle.rect.bottom = self.rect.bottom - 5
-                if balle.speed == outils.RIGHT_DOWN:
+                balle.rect.bottom = self.rect.top - 5
+                if balle.speed == outils.RIGHT_DOWN or balle.speed == outils.LEFT_DOWN:
                     balle.deplacement(outils.RIGHT_UP)
                 else:
                     balle.deplacement(outils.LEFT_UP)
             elif self.rect.center[0] >= balle.rect.center[0] and self.rect.center[1] >= balle.rect.center[1]:
                 # Cote bas
-                balle.rect.top = self.rect.top + 5
+                balle.rect.top = self.rect.bottom + 5
                 if balle.speed == outils.RIGHT_UP:
                     balle.deplacement(outils.RIGHT_DOWN)
                 else:
