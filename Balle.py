@@ -61,9 +61,9 @@ class Ball(pygame.sprite.Sprite):
                 self.deplacement(outils.LEFT_DOWN)
             return outils.PLAY_SOUND_VAR
         elif outils.COTE_HAUT >= self.rect.top:
-            return outils.KILL_J1;
-        elif outils.COTE_BAS <= self.rect.bottom:
             return outils.KILL_J2;
+        elif outils.COTE_BAS <= self.rect.bottom:
+            return outils.KILL_J1;
         elif collide_joueur1 == 0 and collide_joueur2 == 0:
             # Pas de collision
             self.rect = self.rect.move(self.speed)
