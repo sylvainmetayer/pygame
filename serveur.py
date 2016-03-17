@@ -69,8 +69,8 @@ class MyServer(Server):
 
         # TODO temporaire gestion dynamique a faire
         self.briques = Briques()
-        for i in range(100,500,50):
-            self.brique = Brique((600, i))
+        for i in range(10,outils.SCREEN_WIDTH,120):
+            self.brique = Brique((i, outils.SCREEN_HEIGHT/2))
             self.briques.add(self.brique)
         self.clients = Bars()
         self.balle = Ball()
@@ -98,7 +98,14 @@ class MyServer(Server):
     def update_balle(self):
         isBriqueHit = self.briques.gestion(self.balle)
         if not(isBriqueHit):
-            self.balle.update(self.clients.__getitem__(outils.J1).get_bar(), self.clients.__getitem__(outils.J2).get_bar())
+            isJoueurKill = self.balle.update(self.clients.__getitem__(outils.J1).get_bar(), self.clients.__getitem__(outils.J2).get_bar())
+            if isJoueurKill == outils.KILL_J1:
+                self.clients.__getitem__(outils.J1).get_bar().kill()
+                self.send_info("info", "Joueur 1 a perdu ! Bravo joueur 2 !")
+            elif isJoueurKill == outils.KILL_J2:
+                self.clients.__getitem__(outils.J2).get_bar().kill()
+                self.send_info("info", "Joueur 2 a perdu ! Bravo joueur 1 !")
+
 
     def get_positions_bars(self):
         """

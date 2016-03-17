@@ -65,11 +65,11 @@ class Ball(pygame.sprite.Sprite):
         elif outils.COTE_HAUT >= self.rect.top:
             print "Cas 10"
             self.rect.top = outils.COTE_HAUT + 1
-            self.reverse()
+            return outils.KILL_J1;
         elif outils.COTE_BAS <= self.rect.bottom:
             print "Cas 11"
             self.rect.bottom = outils.COTE_BAS - 1
-            self.reverse()
+            return outils.KILL_J2;
         elif collide_joueur1 == 0 and collide_joueur2 == 0:
             print "Cas 5"
             # Pas de collision
@@ -115,6 +115,8 @@ class Ball(pygame.sprite.Sprite):
             elif collide_joueur2 != 0:
                 print "Cas 7"
                 self.deplacement(outils.UP)
+
+            return 0
 
     def deplacement(self, direction):
         print "SPEED " + str(self.speed)
