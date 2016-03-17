@@ -74,6 +74,7 @@ class MyServer(Server):
             self.briques.add(self.brique)
         self.clients = Bars()
         self.balle = Ball()
+        self.endGame = 0
         # self.run = False
         pygame.init()
 
@@ -99,13 +100,15 @@ class MyServer(Server):
             self.clients.__getitem__(outils.J1).Send({"action":"info","message":"perdu"} )
             self.clients.__getitem__(outils.J2).Send({"action":"info","message":"gagne"} )
             self.clients.__getitem__(outils.J1).get_bar().kill()
-            self.clients.remove(self.clients.__getitem__(outils.J1))
+            #self.clients.remove(self.clients.__getitem__(outils.J1))
+            self.endGame = outils.J1
 
         if joueur == outils.KILL_J2:
             self.clients.__getitem__(outils.J1).Send({"action":"info","message":"gagne"} )
             self.clients.__getitem__(outils.J2).Send({"action":"info","message":"perdu"} )
             self.clients.__getitem__(outils.J2).get_bar().kill()
-            self.clients.remove(self.clients.__getitem__(outils.J2))
+            #self.clients.remove(self.clients.__getitem__(outils.J2))
+            self.endGame = outils.J2
 
     def update_balle(self):
         isBriqueHit = self.briques.gestion(self.balle)
@@ -188,6 +191,13 @@ class MyServer(Server):
 
         while True:
             self.Pump()
+
+            if self.endGame != 0:
+                if self.endGame == outils.J1:
+                    self.clients.remove(self.clients.__getitem__(outils.J1))
+                if self.endGame == outils.J2:
+                    self.clients.remove(self.clients.__getitem__(outils.J2))
+
             clock.tick(60)
 
             # Pour permettre de quitter le serveur

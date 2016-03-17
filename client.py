@@ -30,7 +30,9 @@ class Client(ConnectionListener):
         message = data["message"];
         if message == "perdu":
             self.end = 2
+            self.game_client = False
         if message == "gagne":
+            self.game_client = False
             self.end = 1
 
     def Network_sound(self, data):
@@ -124,16 +126,25 @@ def main():
                 briques.draw(screen)
         else:
             print str(client.end)
-            if client.end == 1:
-                screen.blit(background_win, background_win_rect)
-            elif client.end == 2:
-                screen.blit(background_loose, background_loose_rect)
-            else:
-                screen.blit(background_load, background_load_rect)
+
+            screen.blit(background_load, background_load_rect)
 
         # IMPORTANT
         pygame.display.flip()
 
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                sys.exit(0)
+
+        if client.end == 2:
+            pygame.mixer.music.stop()
+            screen.blit(background_win, background_win_rect)
+        if client.end == 1:
+            pygame.mixer.music.stop()
+            screen.blit(background_loose, background_loose_rect)
+
+        pygame.display.flip()
 
 if __name__ == '__main__':
     main()
