@@ -1,7 +1,7 @@
 #!/bin/sh
 
 echo "Arrets des jeux precedents..."
-
+rm *.pyc
 # On s'assure de ne kill que les process correspondant au pwd passé,
 # afin de ne pas interferer avec les autres process python
 

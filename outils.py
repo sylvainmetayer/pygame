@@ -76,7 +76,6 @@ KILL_J2 = 20
 
 
 MARGE_ZONE = 99
-DECALAGE_SPRITE = 2
 
 #Gestion pour les murs
 HAUT = 1
