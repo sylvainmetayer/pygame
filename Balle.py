@@ -7,7 +7,8 @@ from PodSixNet.Connection import ConnectionListener
 
 import outils
 
-# PARTIE SERVEUR
+" PARTIE SERVEUR "
+
 
 class Ball(pygame.sprite.Sprite):
     """
@@ -123,12 +124,13 @@ class Ball(pygame.sprite.Sprite):
         else:
             self.direction = outils.HAUT
 
-# PARTIE CLIENT
+""" PARTIE CLIENT """
+
 
 class BallClient(pygame.sprite.Sprite, ConnectionListener):
-    '''
+    """
     Classe représentant la bille du jeu
-    '''
+    """
 
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)

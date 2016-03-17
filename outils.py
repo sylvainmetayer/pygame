@@ -17,6 +17,7 @@ ALLOW_SOUND = configuration.ALLOW_SOUND
 PORT = configuration.PORT
 ETH = configuration.ETH
 
+
 class Fonction():
     def __init__(self):
         pass
@@ -52,8 +53,6 @@ class Fonction():
             raise SystemExit, message
         return image, image.get_rect()
 
-
-
 # Definitions des côtés de jeu
 SCREEN_WIDTH = 1024
 SCREEN_HEIGHT = 768
@@ -65,7 +64,7 @@ COTE_BAS = SCREEN_HEIGHT
 
 SIZE_SERVEUR = ((SCREEN_WIDTH / 4, SCREEN_HEIGHT / 4))
 
-POS_J1 = [SCREEN_WIDTH / 2, SCREEN_HEIGHT / 3 - 100]
+POS_J1 = [SCREEN_WIDTH / 2, SCREEN_HEIGHT / 4 - 100]
 POS_J2 = [SCREEN_WIDTH / 2, SCREEN_HEIGHT - 100]
 
 KILL_J1 = 10
@@ -77,7 +76,7 @@ KILL_J2 = 20
 
 MARGE_ZONE = 99
 
-#Gestion pour les murs
+# Gestion pour les murs
 HAUT = 1
 BAS = 0
 
