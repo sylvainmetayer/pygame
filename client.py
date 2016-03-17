@@ -16,6 +16,7 @@ class Client(ConnectionListener):
     def __init__(self, host, port):
         self.Connect((host, port))
         self.game_client = True
+        self.end = 0
 
     def Loop(self):
         connection.Pump()
@@ -27,7 +28,12 @@ class Client(ConnectionListener):
         pass
 
     def Network_info(self, data):
-        print data['message']
+        message = data["message"];
+        tab = message.split(" ")
+        if tab[0] == "perdu":
+            self.end = 2
+        if tab[0] == "gagne":
+            self.end = 1
 
     def Network_connected(self, data):
         print('connecte au serveur !')
@@ -68,6 +74,8 @@ def main():
     # Fond du jeu
     background_image, background_rect = outils.Fonction.load_png('images/background.jpg')
     background_load, background_load_rect = outils.Fonction.load_png("images/loading.jpg")
+    background_win, background_win_rect = outils.Fonction.load_png("images/win.jpg")
+    background_loose, background_loose_rect = outils.Fonction.load_png("images/loose.jpg")
 
     # Barre
     bar = BarClient()
@@ -101,14 +109,19 @@ def main():
             client.Send({"action": "keys", "keys": touches})
 
             # On dessine
-            screen.blit(background_image, background_rect)
-            screen.blit(balle.image, balle.rect)
-            bars.draw(screen)
-            briques.draw(screen)
-
+            if client.end == 0:
+                screen.blit(background_image, background_rect)
+                screen.blit(balle.image, balle.rect)
+                bars.draw(screen)
+                briques.draw(screen)
         else:
-            # On affiche un loader
-            screen.blit(background_load, background_load_rect)
+            print str(client.end)
+            if client.end == 1:
+                screen.blit(background_win, background_win_rect)
+            elif client.end == 2:
+                screen.blit(background_loose, background_loose_rect)
+            else:
+                screen.blit(background_load, background_load_rect)
 
         # IMPORTANT
         pygame.display.flip()

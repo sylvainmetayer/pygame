@@ -96,9 +96,14 @@ class MyServer(Server):
 
     def remove_client(self, joueur):
         if joueur == outils.KILL_J1:
+            self.clients.__getitem__(outils.J1).Send({"action":"info","message":"perdu"} )
+            self.clients.__getitem__(outils.J2).Send({"action":"info","message":"gagne"} )
             self.clients.__getitem__(outils.J1).get_bar().kill()
             self.clients.remove(self.clients.__getitem__(outils.J1))
+
         if joueur == outils.KILL_J2:
+            self.clients.__getitem__(outils.J1).Send({"action":"info","message":"gagne"} )
+            self.clients.__getitem__(outils.J2).Send({"action":"info","message":"perdu"} )
             self.clients.__getitem__(outils.J2).get_bar().kill()
             self.clients.remove(self.clients.__getitem__(outils.J2))
 
@@ -107,11 +112,9 @@ class MyServer(Server):
         if not(isBriqueHit):
             isJoueurKill = self.balle.update(self.clients.__getitem__(outils.J1).get_bar(), self.clients.__getitem__(outils.J2).get_bar())
             if isJoueurKill == outils.KILL_J1:
-                self.send_info("info", "Joueur 1 a perdu ! Bravo joueur 2 !")
                 self.remove_client(outils.KILL_J1)
 
             elif isJoueurKill == outils.KILL_J2:
-                self.send_info("info", "Joueur 2 a perdu ! Bravo joueur 1 !")
                 self.remove_client(outils.KILL_J2)
 
 
