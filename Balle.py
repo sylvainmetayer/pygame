@@ -45,33 +45,24 @@ class Ball(pygame.sprite.Sprite):
         if outils.COTE_GAUCHE >= self.rect.left:
             # Collision mur gauche
             if self.direction == outils.HAUT:
-                print "Cas 1"
                 self.rect.left = outils.COTE_GAUCHE + 1
                 self.deplacement(outils.RIGHT_UP)
             else:
                 self.rect.left = outils.COTE_GAUCHE + 1
-                print "Cas 2"
                 self.deplacement(outils.RIGHT_DOWN)
         elif outils.COTE_DROIT <= self.rect.right:
             # Collision mur droit
             if self.direction == outils.HAUT:
-                print "Cas 3"
                 self.rect.right = outils.COTE_DROIT - 1
                 self.deplacement(outils.LEFT_UP)
             else:
-                print "Cas 4"
                 self.rect.right = outils.COTE_DROIT - 1
                 self.deplacement(outils.LEFT_DOWN)
         elif outils.COTE_HAUT >= self.rect.top:
-            print "Cas 10"
-            self.rect.top = outils.COTE_HAUT + 1
             return outils.KILL_J1;
         elif outils.COTE_BAS <= self.rect.bottom:
-            print "Cas 11"
-            self.rect.bottom = outils.COTE_BAS - 1
             return outils.KILL_J2;
         elif collide_joueur1 == 0 and collide_joueur2 == 0:
-            print "Cas 5"
             # Pas de collision
             self.rect = self.rect.move(self.speed)
         else:
@@ -95,32 +86,24 @@ class Ball(pygame.sprite.Sprite):
 
             if leftJoueur <= self.rect.center[0] <= zoneLeftMax:
                 if collide_joueur1 != 0:
-                    print "ZONE_GAUCHE Cas 1"
                     self.deplacement(outils.LEFT_DOWN)
                 else:
-                    print "ZONE_GAUCHE Cas 2"
                     self.deplacement(outils.LEFT_UP)
 
             elif rightJoueur >= self.rect.center[0] >= zoneRightMax:
                 if collide_joueur1 != 0:
-                    print "ZONE_DROITE Cas 1"
                     self.deplacement(outils.RIGHT_DOWN)
                 else:
-                    print "ZONE_DROITE Cas 2"
                     self.deplacement(outils.RIGHT_UP)
 
             elif collide_joueur1 != 0:
-                print "Cas 6"
                 self.deplacement(outils.DOWN)
             elif collide_joueur2 != 0:
-                print "Cas 7"
                 self.deplacement(outils.UP)
 
             return 0
 
     def deplacement(self, direction):
-        print "SPEED " + str(self.speed)
-        print "DIRECTION " + str(direction)
         self.speed = direction
 
     def reverse(self):

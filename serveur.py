@@ -76,7 +76,6 @@ class MyServer(Server):
         self.balle = Ball()
         # self.run = False
         pygame.init()
-        print('Le serveur démarre.')
 
     def Connected(self, channel, addr):
         self.clients.add(channel)
@@ -86,7 +85,7 @@ class MyServer(Server):
         elif len(self.clients) == 2:  # Joueur 2
             clientTmp = self.clients.__getitem__(outils.J2)
             clientTmp.bar.set_position(outils.POS_J2)
-            self.send_info("gameStart", "C'est parti !")
+            self.send_info("info", "C'est parti !")
         else:  # Partie pleine
             channel.Send({"action": "error", "error": "La partie est pleine"})
             # self.run = True
@@ -95,16 +94,26 @@ class MyServer(Server):
         for client in self.clients:
             client.update_bar()
 
+    def remove_client(self, joueur):
+        if joueur == outils.KILL_J1:
+            self.clients.__getitem__(outils.J1).get_bar().kill()
+            self.clients.remove(self.clients.__getitem__(outils.J1))
+        if joueur == outils.KILL_J2:
+            self.clients.__getitem__(outils.J2).get_bar().kill()
+            self.clients.remove(self.clients.__getitem__(outils.J2))
+
     def update_balle(self):
         isBriqueHit = self.briques.gestion(self.balle)
         if not(isBriqueHit):
             isJoueurKill = self.balle.update(self.clients.__getitem__(outils.J1).get_bar(), self.clients.__getitem__(outils.J2).get_bar())
             if isJoueurKill == outils.KILL_J1:
-                self.clients.__getitem__(outils.J1).get_bar().kill()
                 self.send_info("info", "Joueur 1 a perdu ! Bravo joueur 2 !")
+                self.remove_client(outils.KILL_J1)
+
             elif isJoueurKill == outils.KILL_J2:
-                self.clients.__getitem__(outils.J2).get_bar().kill()
                 self.send_info("info", "Joueur 2 a perdu ! Bravo joueur 1 !")
+                self.remove_client(outils.KILL_J2)
+
 
 
     def get_positions_bars(self):
@@ -189,10 +198,6 @@ class MyServer(Server):
                 self.send_bar()
                 self.send_balle()
                 self.send_briques()
-
-                # collisions joueur 1 avec la balle
-                # self.collide_ball(self.balle, self.clients.__getitem__(outils.J1).get_bar())
-                # self.collide_ball(self.balle, self.clients.__getitem__(outils.J2).get_bar())
 
                 screen.blit(background_image, background_rect)
             else:
