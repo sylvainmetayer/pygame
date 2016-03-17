@@ -79,6 +79,7 @@ class MyServer(Server):
         pygame.init()
 
     def Connected(self, channel, addr):
+        print "Client Connecte !"
         self.clients.add(channel)
         if len(self.clients) == 1:
             clientTmp = self.clients.__getitem__(outils.J1)

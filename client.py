@@ -57,7 +57,7 @@ def main():
     # Initialisation de l'écran
     screen = pygame.display.set_mode((outils.SCREEN_WIDTH, outils.SCREEN_HEIGHT))
 
-    if len(sys.argv) == 2:
+    if len(sys.argv) == 3:
         port = sys.argv[2]
         ip = sys.argv[1]
     else:
