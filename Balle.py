@@ -50,6 +50,7 @@ class Ball(pygame.sprite.Sprite):
             else:
                 self.rect.left = outils.COTE_GAUCHE + 1
                 self.deplacement(outils.RIGHT_DOWN)
+            return outils.PLAY_SOUND
         elif outils.COTE_DROIT <= self.rect.right:
             # Collision mur droit
             if self.direction == outils.HAUT:
@@ -58,6 +59,7 @@ class Ball(pygame.sprite.Sprite):
             else:
                 self.rect.right = outils.COTE_DROIT - 1
                 self.deplacement(outils.LEFT_DOWN)
+            return outils.PLAY_SOUND
         elif outils.COTE_HAUT >= self.rect.top:
             return outils.KILL_J1;
         elif outils.COTE_BAS <= self.rect.bottom:
@@ -100,8 +102,7 @@ class Ball(pygame.sprite.Sprite):
                 self.deplacement(outils.DOWN)
             elif collide_joueur2 != 0:
                 self.deplacement(outils.UP)
-
-            return 0
+            return outils.PLAY_SOUND
 
     def deplacement(self, direction):
         self.speed = direction

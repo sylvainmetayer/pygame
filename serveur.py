@@ -118,6 +118,8 @@ class MyServer(Server):
 
             elif isJoueurKill == outils.KILL_J2:
                 self.remove_client(outils.KILL_J2)
+            elif isJoueurKill == outils.PLAY_SOUND:
+                self.send_info("sound_bound", "")
 
 
 

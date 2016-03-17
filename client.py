@@ -24,8 +24,7 @@ class Client(ConnectionListener):
 
     def Network(self, data):
         # ('message de type %s recu' % data['action'])
-        # print data
-        pass
+        print data
 
     def Network_info(self, data):
         message = data["message"];
@@ -35,8 +34,10 @@ class Client(ConnectionListener):
             self.end = 1
 
     def Network_sound_bound(self, data):
-        print data
-        pygame.mixer.music.load("son/bound.mp3")
+        pygame.mixer.Sound("son/bound.wav").play()
+
+    def Network_sound_break(self, data):
+        pygame.mixer.Sound("son/break.wav").play()
 
     def Network_connected(self, data):
         print('connecte au serveur !')
@@ -63,13 +64,14 @@ def main():
         port = outils.PORT
         ip = outils.IP
 
-    # Instanciation des composants du jeu.
-    client = Client(ip, int(port))
-    balle = BallClient()
 
     # Initialisation Pygame
     pygame.init()
     clock = pygame.time.Clock()
+
+    # Instanciation des composants du jeu.
+    client = Client(ip, int(port))
+    balle = BallClient()
 
     # Pour autoriser la répétition des touches pressées
     pygame.key.set_repeat(1, 1)
@@ -88,6 +90,7 @@ def main():
 
     #Depart de la musique
     pygame.mixer.music.load("son/music.mp3")
+    pygame.mixer.music.set_volume(0.3)
     pygame.mixer.music.play(-1)
 
 
