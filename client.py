@@ -16,7 +16,7 @@ class Client(ConnectionListener):
     def __init__(self, host, port):
         self.Connect((host, port))
         self.game_client = True
-        self.end = 0
+        self.end = 3
 
     def Loop(self):
         connection.Pump()
@@ -29,10 +29,9 @@ class Client(ConnectionListener):
 
     def Network_info(self, data):
         message = data["message"];
-        tab = message.split(" ")
-        if tab[0] == "perdu":
+        if message == "perdu":
             self.end = 2
-        if tab[0] == "gagne":
+        if message == "gagne":
             self.end = 1
 
     def Network_connected(self, data):
@@ -85,7 +84,7 @@ def main():
 
 
     # Boucle de jeu principale
-    while True:
+    while client.game_client:
         clock.tick(60)
 
         # IMPORTANT : pump de la connexion
@@ -100,8 +99,6 @@ def main():
                 sys.exit(0)
 
         if len(bars) == 2:
-            # 2 joueurs, la partie peut commencer
-
             # Récupération des touches
             touches = pygame.key.get_pressed()
 
@@ -109,7 +106,7 @@ def main():
             client.Send({"action": "keys", "keys": touches})
 
             # On dessine
-            if client.end == 0:
+            if client.end == 3:
                 screen.blit(background_image, background_rect)
                 screen.blit(balle.image, balle.rect)
                 bars.draw(screen)
