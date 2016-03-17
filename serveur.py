@@ -110,7 +110,7 @@ class MyServer(Server):
     def update_balle(self):
         isBriqueHit = self.briques.gestion(self.balle)
         if isBriqueHit:
-            self.send_info("sound", "bound.wav")
+            self.send_info("sound", "break.wav")
         if not(isBriqueHit):
             isJoueurKill = self.balle.update(self.clients.__getitem__(outils.J1).get_bar(), self.clients.__getitem__(outils.J2).get_bar())
             if isJoueurKill == outils.KILL_J1:

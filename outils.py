@@ -9,6 +9,13 @@ import pygame
 import socket
 import struct
 
+import configuration
+
+BALL_SPEED = configuration.BALL_SPEED
+NB_VIE_BRIQUE_0 = configuration.NB_VIE_BRIQUE_0
+ALLOW_SOUND = configuration.ALLOW_SOUND
+PORT = configuration.PORT
+ETH = configuration.ETH
 
 class Fonction():
     def __init__(self):
@@ -67,7 +74,7 @@ J1 = 0
 J2 = 1
 KILL_J2 = 20
 
-BALL_SPEED = 3
+
 MARGE_ZONE = 99
 
 #Gestion pour les murs
@@ -82,20 +89,9 @@ LEFT_DOWN = [-BALL_SPEED, BALL_SPEED]
 RIGHT_DOWN = [BALL_SPEED, BALL_SPEED]
 RIGHT_UP = [BALL_SPEED, -BALL_SPEED]
 
-POS_BALLE = [SCREEN_WIDTH / 2 -50 , SCREEN_HEIGHT / 2 -50]
+POS_BALLE = [SCREEN_WIDTH / 2 -50 , SCREEN_HEIGHT / 2 +50]
 
 PLAY_SOUND_VAR = 0
 # LEs briques
-NB_VIE_BRIQUE_0 = 2
 
-ALLOW_SOUND = True
-
-"""
- Configuration par défaut (utilisation locale) :
-    Port 8888
-    On récupère l'adresse IP de l'interface ETH (à préciser et adapter)
-"""
-
-PORT = 8888
-ETH = "wlan0"
 IP = Fonction.get_ip_address(ETH)
