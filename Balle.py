@@ -117,6 +117,11 @@ class Ball(pygame.sprite.Sprite):
         elif self.speed == outils.LEFT_DOWN:
             self.deplacement(outils.LEFT_UP)
 
+    def reverseDirection(self):
+        if self.direction == outils.HAUT:
+            self.direction = outils.BAS
+        else:
+            self.direction = outils.HAUT
 
 # PARTIE CLIENT
 

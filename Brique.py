@@ -28,11 +28,11 @@ class Brique(pygame.sprite.Sprite):
             self.kill()
 
     def gestion(self, balle):
-        if self.rect.colliderect(balle.rect):
+        if pygame.sprite.collide_circle(self, balle):
             self.hit()
             if self.rect.center[0] >= balle.rect.center[0] and self.rect.center[1] <= balle.rect.center[1] :
                 print "Recentrer balle à gauche de la brique"
-                balle.rect.right = self.rect.left - 50
+                balle.rect.right = self.rect.left - outils.DECALAGE_SPRITE
                 # Coté gauche
                 if balle.speed == outils.RIGHT_UP:
                     balle.deplacement(outils.LEFT_UP)
@@ -41,7 +41,7 @@ class Brique(pygame.sprite.Sprite):
             elif self.rect.center[1] >= balle.rect.center[1] and self.rect.center[0] <= balle.rect.center[0]:
                 # Côté droit
                 print "Recentrer balle à droite de la brique"
-                balle.rect.left = self.rect.right + 50
+                balle.rect.left = self.rect.right + outils.DECALAGE_SPRITE
                 if balle.speed == outils.LEFT_UP:
                     balle.deplacement(outils.RIGHT_UP)
                 else:
@@ -49,19 +49,27 @@ class Brique(pygame.sprite.Sprite):
             elif self.rect.center[0] <= balle.rect.center[0] and self.rect.center[1] <= balle.rect.center[1]:
                 # Cote haut
                 print "Recentrer balle en bas de la brique"
-                balle.rect.bottom = self.rect.top - 50
-                if balle.speed == outils.RIGHT_DOWN or balle.speed == outils.LEFT_DOWN:
+                balle.rect.bottom = self.rect.top - outils.DECALAGE_SPRITE
+                balle.reverseDirection()
+                if (balle.speed == outils.RIGHT_DOWN and balle.direction == outils.BAS) :
                     balle.deplacement(outils.RIGHT_UP)
-                else:
+                elif balle.speed == outils.LEFT_DOWN and balle.direction == outils.BAS:
                     balle.deplacement(outils.LEFT_UP)
+                else:
+                    balle.deplacement(outils.DOWN)
+                    print "Oups, ce cas 1 ne doit pas arriver !"
             elif self.rect.center[0] >= balle.rect.center[0] and self.rect.center[1] >= balle.rect.center[1]:
                 # Cote bas
+                balle.reverseDirection()
                 print "Recentrer balle en haut de la brique"
-                balle.rect.top = self.rect.bottom + 50
-                if balle.speed == outils.RIGHT_UP:
+                balle.rect.top = self.rect.bottom + outils.DECALAGE_SPRITE
+                if (balle.speed == outils.RIGHT_UP and balle.direction == outils.HAUT) :
                     balle.deplacement(outils.RIGHT_DOWN)
-                else:
+                elif balle.speed == outils.LEFT_UP and balle.direction == outils.HAUT:
                     balle.deplacement(outils.LEFT_DOWN)
+                else:
+                    balle.deplacement(outils.UP)
+                    print "Oups, ce cas 2 ne doit pas arriver !"
             return True
         return False
 
