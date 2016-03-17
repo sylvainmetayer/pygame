@@ -132,19 +132,23 @@ def main():
         # IMPORTANT
         pygame.display.flip()
 
+    pygame.mixer.music.stop()
+    if client.end == 2:
+       pygame.mixer.Sound("son/win.wav").play()
+    if client.end == 1:
+       pygame.mixer.Sound("son/loose.wav").play()
+
+    if client.end == 2:
+        screen.blit(background_win, background_win_rect)
+    if client.end == 1:
+        screen.blit(background_loose, background_loose_rect)
+    pygame.display.flip()
+
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 sys.exit(0)
 
-        if client.end == 2:
-            pygame.mixer.music.stop()
-            screen.blit(background_win, background_win_rect)
-        if client.end == 1:
-            pygame.mixer.music.stop()
-            screen.blit(background_loose, background_loose_rect)
-
-        pygame.display.flip()
 
 if __name__ == '__main__':
     main()
