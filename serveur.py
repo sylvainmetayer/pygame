@@ -110,7 +110,7 @@ class MyServer(Server):
     def update_balle(self):
         isBriqueHit = self.briques.gestion(self.balle)
         if isBriqueHit:
-            self.send_info("sound_break", "break")
+            self.send_info("sound", "bound.wav")
         if not(isBriqueHit):
             isJoueurKill = self.balle.update(self.clients.__getitem__(outils.J1).get_bar(), self.clients.__getitem__(outils.J2).get_bar())
             if isJoueurKill == outils.KILL_J1:
@@ -118,8 +118,8 @@ class MyServer(Server):
 
             elif isJoueurKill == outils.KILL_J2:
                 self.remove_client(outils.KILL_J2)
-            elif isJoueurKill == outils.PLAY_SOUND:
-                self.send_info("sound_bound", "")
+            elif isJoueurKill == outils.PLAY_SOUND_VAR:
+                self.send_info("sound", "bound.wav")
 
 
 

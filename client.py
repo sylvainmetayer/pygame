@@ -33,11 +33,9 @@ class Client(ConnectionListener):
         if message == "gagne":
             self.end = 1
 
-    def Network_sound_bound(self, data):
-        pygame.mixer.Sound("son/bound.wav").play()
-
-    def Network_sound_break(self, data):
-        pygame.mixer.Sound("son/break.wav").play()
+    def Network_sound(self, data):
+        if outils.ALLOW_SOUND:
+            pygame.mixer.Sound("son/"+data["message"]).play()
 
     def Network_connected(self, data):
         print('connecte au serveur !')
@@ -89,9 +87,11 @@ def main():
     briques = BriquesClient()
 
     #Depart de la musique
-    pygame.mixer.music.load("son/music.mp3")
-    pygame.mixer.music.set_volume(0.3)
-    pygame.mixer.music.play(-1)
+
+    if outils.ALLOW_SOUND:
+        pygame.mixer.music.load("son/music.mp3")
+        pygame.mixer.music.set_volume(0.3)
+        pygame.mixer.music.play(-1)
 
 
     # Boucle de jeu principale
