@@ -109,6 +109,8 @@ class MyServer(Server):
 
     def update_balle(self):
         isBriqueHit = self.briques.gestion(self.balle)
+        if isBriqueHit:
+            self.send_info("sound_break", "break")
         if not(isBriqueHit):
             isJoueurKill = self.balle.update(self.clients.__getitem__(outils.J1).get_bar(), self.clients.__getitem__(outils.J2).get_bar())
             if isJoueurKill == outils.KILL_J1:
@@ -166,6 +168,7 @@ class MyServer(Server):
     def collide_ball(self, balle, bar):
         if balle.rect.colliderect(bar.rect) or balle.rect.colliderect(bar.rect):
             print "Collision "
+            self.send_info("sound_bound", "bound")
             balle.deplacement()
 
     def del_client(self, channel):
