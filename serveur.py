@@ -14,12 +14,6 @@ from Balle import Ball
 from Bar import Bar, Bars
 from Brique import Briques, Brique
 
-"""
-TODO
-- Ajouter la balle et la gestion de mort en cas de sortie de l'écran.
-- Ajouter la des monstres qui poppent via des briques speciales et de la mort de la barre adverse.
-- Faire des briques spéciales (1-2-3 vies pour mourir, qui font pop des monstres, ...)
-"""
 
 class ClientChannel(Channel, pygame.sprite.Sprite):
     """
@@ -48,9 +42,6 @@ class ClientChannel(Channel, pygame.sprite.Sprite):
         if touches[K_LEFT] or touches[K_q]:
             self.bar.left()
 
-            # def send_bar(self):
-            # pass
-            # Cela servira-t-il a qqch ?
 
     def update_bar(self):
         self.bar.update()
@@ -123,8 +114,6 @@ class MyServer(Server):
                 self.remove_client(outils.KILL_J2)
             elif isJoueurKill == outils.PLAY_SOUND_VAR:
                 self.send_info("sound", "bound.wav")
-
-
 
     def get_positions_bars(self):
         """
