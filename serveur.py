@@ -233,6 +233,8 @@ class MyServer(Server):
                     time.sleep(3)
 
                 self.update_bar()
+                pygame.sprite.groupcollide(self.briques, self.clients.__getitem__(outils.J1).tir_sprites, False, True, pygame.sprite.collide_circle_ratio(0.7))
+                pygame.sprite.groupcollide(self.briques, self.clients.__getitem__(outils.J2).tir_sprites, False, True, pygame.sprite.collide_circle_ratio(0.7))
                 self.update_balle()
                 self.send_bar()
                 self.send_balle()
