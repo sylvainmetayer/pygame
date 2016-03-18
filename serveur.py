@@ -81,6 +81,8 @@ class MyServer(Server):
         self.clients = Bars()
         self.balle = Ball()
         self.endGame = 0
+        self.spriteJ1 = pygame.sprite.RenderClear()
+        self.spriteJ2 = pygame.sprite.RenderClear()
         # self.run = False
         pygame.init()
 
@@ -90,10 +92,12 @@ class MyServer(Server):
             clientTmp = self.clients.__getitem__(outils.J1)
             clientTmp.bar.set_position(outils.POS_J1)
             clientTmp.joueur = outils.J1
+            self.spriteJ1.add(clientTmp.bar)
         elif len(self.clients) == 2:  # Joueur 2
             clientTmp = self.clients.__getitem__(outils.J2)
             clientTmp.bar.set_position(outils.POS_J2)
             clientTmp.joueur = outils.J2
+            self.spriteJ1.add(clientTmp.bar)
             self.send_info("info", "C'est parti !")
         else:  # Partie pleine
             channel.Send({"action": "error", "error": "La partie est pleine"})
@@ -201,6 +205,22 @@ class MyServer(Server):
     def del_client(self, channel):
         self.clients.remove(channel)
 
+    def check_collision_tir_player(self):
+        for tir in self.clients.__getitem__(outils.J1).tir_sprites:
+            print "LOL_J1"
+            collision = tir.colliderect(self.clients.__getitem__(outils.J2).get_bar())
+
+            if collision != 0:
+                # Collision joueur - tir 1
+                self.remove_client(outils.KILL_J2)
+        for tir in self.clients.__getitem__(outils.J2).tir_sprites:
+            print "LOL_J2"
+            collision = tir.colliderect(self.clients.__getitem__(outils.J1).get_bar())
+            if collision != 0:
+                # Collision joueur - tir 1
+                self.remove_client(outils.KILL_J1)
+
+
     def launch_game(self):
         screen = self.screen
         background_image, background_rect = outils.Fonction.load_png('images/background.jpg')
@@ -236,9 +256,10 @@ class MyServer(Server):
                 pygame.sprite.groupcollide(self.briques, self.clients.__getitem__(outils.J1).tir_sprites, False, True, pygame.sprite.collide_circle_ratio(0.7))
                 pygame.sprite.groupcollide(self.briques, self.clients.__getitem__(outils.J2).tir_sprites, False, True, pygame.sprite.collide_circle_ratio(0.7))
                 self.update_balle()
+                self.check_collision_tir_player()
                 # Gestion collision Joueur tir
-                pygame.sprite.groupcollide(self.clients.__getitem__(outils.J1), self.clients.__getitem__(outils.J1).tir_sprites, True, True, pygame.sprite.collide_circle_ratio(0.7))
-                pygame.sprite.groupcollide(self.clients.__getitem__(outils.J2), self.clients.__getitem__(outils.J2).tir_sprites, True, True, pygame.sprite.collide_circle_ratio(0.7))
+                #pygame.sprite.groupcollide(self.spriteJ1, self.clients.__getitem__(outils.J1).tir_sprites, True, True, pygame.sprite.collide_circle_ratio(0.7))
+                #pygame.sprite.groupcollide(self.spriteJ2, self.clients.__getitem__(outils.J2).tir_sprites, True, True, pygame.sprite.collide_circle_ratio(0.7))
                 self.send_bar()
                 self.send_balle()
                 self.send_briques()
