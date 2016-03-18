@@ -64,7 +64,7 @@ class ClientChannel(Channel, pygame.sprite.Sprite):
         self.tir_sprites.update(self.joueur)
 
     def send_info(self, action, message):
-        print message
+        print action + " - " + message
         self.Send({"action": action, "message": message})
 
     def get_bar(self):
@@ -169,18 +169,21 @@ class MyServer(Server):
 
     def send_briques(self):
         for client in self.clients:
+            print "Briques \n\t"
             print self.get_positions_briques()
             client.Send({"action" : "briques", "liste":self.get_positions_briques()})
 
     def send_bar(self):
         for client in self.clients:
+            print "Bar \n\t"
             print self.get_positions_bars()
             client.Send({"action": "bar", "liste": self.get_positions_bars()})
 
     def send_balle(self):
         for client in self.clients:
-            print self.balle.rect.center
+            print "Balle : " + self.balle.rect.center
             client.Send({"action": "balle", "center": self.balle.rect.center})
+            print "Liste Tirs : \n\t"
             print self.get_shot()
             client.Send({"action": "shot", "liste":self.get_shot()})
 
@@ -193,7 +196,7 @@ class MyServer(Server):
         :return:
         """
         for client in self.clients:
-            print message
+            print action + " - " +message
             client.Send({"action": action, "message": message})
 
     def get_all_clients(self):
@@ -204,7 +207,7 @@ class MyServer(Server):
 
     def collide_ball(self, balle, bar):
         if balle.rect.colliderect(bar.rect) or balle.rect.colliderect(bar.rect):
-            self.send_info("sound_bound", "bound")
+            self.send_info("sound", "bound.wav")
             balle.deplacement()
 
     def del_client(self, channel):
