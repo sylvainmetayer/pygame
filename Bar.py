@@ -27,13 +27,13 @@ class Bar(pygame.sprite.Sprite):
         self.pas = 10  # Vitesse de déplacement
 
     def left(self):
-        if self.rect.left <= -100:
+        if self.rect.left <= -200:
             self.rect = self.rect.move([0, 0])
         else:
             self.rect = self.rect.move([-self.pas, 0])
 
     def right(self):
-        if self.rect.right >= outils.SCREEN_WIDTH + 100:
+        if self.rect.right >= outils.SCREEN_WIDTH + 200:
             self.rect = self.rect.move([0, 0])
         else:
             self.rect = self.rect.move([self.pas, 0])
