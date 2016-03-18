@@ -3,6 +3,7 @@
 
 import pygame
 import sys
+from pygame.locals import *
 
 from PodSixNet.Connection import connection, ConnectionListener
 
@@ -29,7 +30,8 @@ class Client(ConnectionListener):
 
 
     def Network_info(self, data):
-        message = data["message"];
+        message = data["message"]
+        print message
         if message == "perdu":
             self.end = 2
             self.game_client = False
@@ -91,10 +93,10 @@ def main():
     briques = BriquesClient()
 
     #Depart de la musique
-
+    pygame.mixer.music.load("son/music.mp3")
+    pygame.mixer.music.set_volume(0.3)
+    
     if outils.ALLOW_SOUND:
-        pygame.mixer.music.load("son/music.mp3")
-        pygame.mixer.music.set_volume(0.3)
         pygame.mixer.music.play(-1)
 
 
@@ -117,9 +119,18 @@ def main():
             # Récupération des touches
             touches = pygame.key.get_pressed()
 
+            if touches[K_m]:
+                print "Hello"
+                if outils.ALLOW_SOUND:
+                    outils.ALLOW_SOUND = False
+                    pygame.mixer.music.pause()
+                else:
+                    outils.ALLOW_SOUND = True
+                    pygame.mixer.music.unpause()
+
             # Notification au serveur
             client.Send({"action": "keys", "keys": touches})
-
+            print "Coucou"
             # On dessine
             if client.end == 3:
                 screen.blit(background_image, background_rect)
@@ -134,9 +145,11 @@ def main():
 
     pygame.mixer.music.stop()
     if client.end == 2:
-       pygame.mixer.Sound("son/win.wav").play()
+        if outils.ALLOW_SOUND:
+            pygame.mixer.Sound("son/win.wav").play()
     if client.end == 1:
-       pygame.mixer.Sound("son/loose.wav").play()
+        if outils.ALLOW_SOUND:
+            pygame.mixer.Sound("son/loose.wav").play()
 
     if client.end == 2:
         screen.blit(background_win, background_win_rect)
