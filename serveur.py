@@ -47,7 +47,6 @@ class ClientChannel(Channel, pygame.sprite.Sprite):
         if touches[K_LEFT] or touches[K_q]:
             self.bar.left()
         if touches[K_SPACE]:
-            self.send_status_shot()
             if self.shotAllowed:
                 tir = Tir(self.bar)
                 self.tir_sprites.add(tir)
