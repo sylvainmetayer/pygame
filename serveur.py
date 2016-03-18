@@ -60,6 +60,7 @@ class ClientChannel(Channel, pygame.sprite.Sprite):
                     self.shotAllowed = True
 
     def send_status_shot(self):
+        print self.shotAllowed
         self.Send({"action":"isAllowedToShot", "value":self.shotAllowed})
 
     def update_bar(self):
