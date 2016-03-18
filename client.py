@@ -19,6 +19,7 @@ class Client(ConnectionListener):
         self.Connect((host, port))
         self.game_client = True
         self.end = 3
+        self.shotAllowed = True
 
     def Loop(self):
         connection.Pump()
@@ -29,6 +30,8 @@ class Client(ConnectionListener):
         # ('message de type %s recu' % data['action'])
         pass
 
+    def Network_isAllowedToShot(self, data):
+        self.shotAllowed = data['value']
 
     def Network_info(self, data):
         message = data["message"]
@@ -86,6 +89,9 @@ def main():
     background_win, background_win_rect = outils.Fonction.load_png("images/win.jpg")
     background_loose, background_loose_rect = outils.Fonction.load_png("images/loose.jpg")
 
+    # Image de waiting shot
+    background_shot, background_shot_rect = outils.Fonction.load_png("images/red_point.png")
+
     # Barre
     bar = BarClient()
     bars = BarsClient()
@@ -133,6 +139,8 @@ def main():
             client.Send({"action": "keys", "keys": touches})
             # On dessine
             if client.end == 3:
+                screen.blit(background_shot, (250,250))
+
                 screen.blit(background_image, background_rect)
                 screen.blit(balle.image, balle.rect)
 

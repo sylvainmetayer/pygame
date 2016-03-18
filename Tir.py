@@ -28,7 +28,7 @@ class Tir(pygame.sprite.Sprite):
             self.rect = self.rect.move([0, -10])
         else:
             self.rect = self.rect.move([0, 10])
-        if self.rect.top <= -20:
+        if self.rect.top <= -20 or self.rect.bottom >= outils.SCREEN_HEIGHT:
             self.kill()
             return True
         return False

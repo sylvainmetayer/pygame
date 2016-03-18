@@ -51,12 +51,16 @@ class ClientChannel(Channel, pygame.sprite.Sprite):
                 tir = Tir(self.bar)
                 self.tir_sprites.add(tir)
                 self.shotAllowed = False
+                self.send_status_shot()
                 self.tirCompteurTmp = 40
             else:
                 if self.tirCompteurTmp >= 0:
                     self.tirCompteurTmp -= 1
                 else:
                     self.shotAllowed = True
+
+    def send_status_shot(self):
+        self.Send({"action":"isAllowedToShot", "value":self.shotAllowed})
 
     def update_bar(self):
         self.bar.update()
@@ -208,17 +212,14 @@ class MyServer(Server):
     def check_collision_tir_player(self):
         for tir in self.clients.__getitem__(outils.J1).tir_sprites:
             print "LOL_J1"
-            collision = tir.colliderect(self.clients.__getitem__(outils.J2).get_bar())
-
-            if collision != 0:
-                # Collision joueur - tir 1
-                self.remove_client(outils.KILL_J2)
-        for tir in self.clients.__getitem__(outils.J2).tir_sprites:
-            print "LOL_J2"
-            collision = tir.colliderect(self.clients.__getitem__(outils.J1).get_bar())
-            if collision != 0:
+            if pygame.sprite.collide_rect(tir, self.clients.__getitem__(outils.J2).get_bar()):
                 # Collision joueur - tir 1
                 self.remove_client(outils.KILL_J1)
+        for tir in self.clients.__getitem__(outils.J2).tir_sprites:
+            print "LOL_J2"
+            if pygame.sprite.collide_rect(tir, self.clients.__getitem__(outils.J1).get_bar()):
+                # Collision joueur - tir 1
+                self.remove_client(outils.KILL_J2)
 
 
     def launch_game(self):
@@ -263,6 +264,7 @@ class MyServer(Server):
                 self.send_bar()
                 self.send_balle()
                 self.send_briques()
+
                 print "-----------------------------------------"
 
                 screen.blit(background_image, background_rect)
