@@ -25,7 +25,7 @@ class ClientChannel(Channel, pygame.sprite.Sprite):
         Channel.__init__(self, *args, **kwargs)
         pygame.sprite.Sprite.__init__(self)
         self.bar = Bar()
-        self.tirCompteurTmp = 30
+        self.tirCompteurTmp = 40
         self.shotAllowed = True
         self.tir_sprites = Tirs()
         self.joueur = outils.J1
@@ -51,7 +51,7 @@ class ClientChannel(Channel, pygame.sprite.Sprite):
                 tir = Tir(self.bar)
                 self.tir_sprites.add(tir)
                 self.shotAllowed = False
-                self.tirCompteurTmp = 30
+                self.tirCompteurTmp = 40
             else:
                 if self.tirCompteurTmp >= 0:
                     self.tirCompteurTmp -= 1
@@ -236,6 +236,9 @@ class MyServer(Server):
                 pygame.sprite.groupcollide(self.briques, self.clients.__getitem__(outils.J1).tir_sprites, False, True, pygame.sprite.collide_circle_ratio(0.7))
                 pygame.sprite.groupcollide(self.briques, self.clients.__getitem__(outils.J2).tir_sprites, False, True, pygame.sprite.collide_circle_ratio(0.7))
                 self.update_balle()
+                # Gestion collision Joueur tir
+                pygame.sprite.groupcollide(self.clients.__getitem__(outils.J1), self.clients.__getitem__(outils.J1).tir_sprites, True, True, pygame.sprite.collide_circle_ratio(0.7))
+                pygame.sprite.groupcollide(self.clients.__getitem__(outils.J2), self.clients.__getitem__(outils.J2).tir_sprites, True, True, pygame.sprite.collide_circle_ratio(0.7))
                 self.send_bar()
                 self.send_balle()
                 self.send_briques()
