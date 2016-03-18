@@ -28,6 +28,7 @@ class ClientChannel(Channel, pygame.sprite.Sprite):
         self.tirCompteurTmp = 30
         self.shotAllowed = True
         self.tir_sprites = Tirs()
+        self.joueur = outils.J1
 
     def Close(self):
         self._server.del_client(self)
@@ -59,7 +60,7 @@ class ClientChannel(Channel, pygame.sprite.Sprite):
 
     def update_bar(self):
         self.bar.update()
-        self.tir_sprites.update()
+        self.tir_sprites.update(self.joueur)
 
     def get_bar(self):
         return self.bar
@@ -73,7 +74,6 @@ class MyServer(Server):
         pygame.display.set_caption("Server")
         self.screen = pygame.display.set_mode(outils.SIZE_SERVEUR)
 
-        # TODO temporaire gestion dynamique a faire
         self.briques = Briques()
         for i in range(10,outils.SCREEN_WIDTH,120):
             self.brique = Brique((i, outils.SCREEN_HEIGHT/2))
@@ -89,9 +89,11 @@ class MyServer(Server):
         if len(self.clients) == 1:
             clientTmp = self.clients.__getitem__(outils.J1)
             clientTmp.bar.set_position(outils.POS_J1)
+            clientTmp.joueur = outils.J1
         elif len(self.clients) == 2:  # Joueur 2
             clientTmp = self.clients.__getitem__(outils.J2)
             clientTmp.bar.set_position(outils.POS_J2)
+            clientTmp.joueur = outils.J2
             self.send_info("info", "C'est parti !")
         else:  # Partie pleine
             channel.Send({"action": "error", "error": "La partie est pleine"})
@@ -117,14 +119,12 @@ class MyServer(Server):
             self.clients.__getitem__(outils.J1).Send({"action":"info","message":"perdu"} )
             self.clients.__getitem__(outils.J2).Send({"action":"info","message":"gagne"} )
             self.clients.__getitem__(outils.J1).get_bar().kill()
-            #self.clients.remove(self.clients.__getitem__(outils.J1))
             self.endGame = outils.J1
 
         if joueur == outils.KILL_J2:
             self.clients.__getitem__(outils.J1).Send({"action":"info","message":"gagne"} )
             self.clients.__getitem__(outils.J2).Send({"action":"info","message":"perdu"} )
             self.clients.__getitem__(outils.J2).get_bar().kill()
-            #self.clients.remove(self.clients.__getitem__(outils.J2))
             self.endGame = outils.J2
 
     def update_balle(self):
@@ -160,16 +160,19 @@ class MyServer(Server):
 
     def send_briques(self):
         for client in self.clients:
+            print self.get_positions_briques()
             client.Send({"action" : "briques", "liste":self.get_positions_briques()})
 
     def send_bar(self):
         for client in self.clients:
+            print self.get_positions_bars()
             client.Send({"action": "bar", "liste": self.get_positions_bars()})
-            client.Send
 
     def send_balle(self):
         for client in self.clients:
+            print self.balle.rect.center
             client.Send({"action": "balle", "center": self.balle.rect.center})
+            print self.get_shot()
             client.Send({"action": "shot", "liste":self.get_shot()})
 
     def send_info(self, action, message):
@@ -181,6 +184,7 @@ class MyServer(Server):
         :return:
         """
         for client in self.clients:
+            print message
             client.Send({"action": action, "message": message})
 
     def get_all_clients(self):
@@ -233,6 +237,7 @@ class MyServer(Server):
                 self.send_bar()
                 self.send_balle()
                 self.send_briques()
+                print "-----------------------------------------"
 
                 screen.blit(background_image, background_rect)
             else:

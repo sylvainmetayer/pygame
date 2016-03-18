@@ -32,7 +32,6 @@ class Client(ConnectionListener):
 
     def Network_info(self, data):
         message = data["message"]
-        print message
         if message == "perdu":
             self.end = 2
             self.game_client = False

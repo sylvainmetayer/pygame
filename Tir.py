@@ -19,12 +19,15 @@ class Tir(pygame.sprite.Sprite):
         self.speed = [0, -1]
         self.rect.center = bar.rect.center
 
-    def update(self):
+    def update(self, joueur):
         """
 
         :return: True si le tir est mort, False sinon
         """
-        self.rect = self.rect.move([0, -10])
+        if joueur == outils.J2:
+            self.rect = self.rect.move([0, -10])
+        else:
+            self.rect = self.rect.move([0, 10])
         if self.rect.top <= -20:
             self.kill()
             return True
@@ -39,9 +42,9 @@ class Tirs(pygame.sprite.Group):
     def __init__(self):
         pygame.sprite.Group.__init__(self)
 
-    def update(self):
+    def update(self, joueur):
         for tir in self.sprites():
-            retour = tir.update()
+            retour = tir.update(joueur)
             if retour == True:
                 self.remove(tir);  # Le tir est mort.
 
@@ -75,8 +78,6 @@ class TirsClient(pygame.sprite.Group, ConnectionListener):
     def Network_shot(self, data):
         self.empty()
         listeTir = data["liste"]
-        print listeTir
-        print "LEL"
         for xy in listeTir:
             tir = TirClient(xy)
             self.add(tir)

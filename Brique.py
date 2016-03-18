@@ -33,7 +33,7 @@ class Brique(pygame.sprite.Sprite):
         if pygame.sprite.collide_circle(self, balle):
             self.hit()
             if self.rect.center[0] > balle.rect.center[0] and self.rect.center[1] < balle.rect.center[1] :
-                print "Recentrer balle à gauche de la brique"
+                #print "Recentrer balle à gauche de la brique"
 
                 #balle.rect.right = self.rect.left - 2
                 # Coté gauche
@@ -43,7 +43,7 @@ class Brique(pygame.sprite.Sprite):
                     balle.deplacement(outils.LEFT_DOWN)
             elif self.rect.center[1] > balle.rect.center[1] and self.rect.center[0] < balle.rect.center[0]:
                 # Côté droit
-                print "Recentrer balle à droite de la brique"
+                #print "Recentrer balle à droite de la brique"
                 #balle.rect.left = self.rect.right + 2
                 if balle.speed == outils.LEFT_UP:
                     balle.deplacement(outils.RIGHT_UP)
@@ -51,7 +51,7 @@ class Brique(pygame.sprite.Sprite):
                     balle.deplacement(outils.RIGHT_DOWN)
             elif self.rect.center[0] < balle.rect.center[0] and self.rect.center[1] < balle.rect.center[1]:
                 # Cote haut
-                print "Recentrer balle en bas de la brique"
+                #print "Recentrer balle en bas de la brique"
                 #balle.rect.bottom = self.rect.top - 2
                 balle.reverseDirection()
                 if (balle.speed == outils.RIGHT_DOWN and balle.direction == outils.BAS) :
@@ -63,7 +63,7 @@ class Brique(pygame.sprite.Sprite):
             elif self.rect.center[0] > balle.rect.center[0] and self.rect.center[1] > balle.rect.center[1]:
                 # Cote bas
                 balle.reverseDirection()
-                print "Recentrer balle en haut de la brique"
+                #print "Recentrer balle en haut de la brique"
                 #balle.rect.top = self.rect.bottom + 2
                 if (balle.speed == outils.RIGHT_UP and balle.direction == outils.HAUT) :
                     balle.deplacement(outils.RIGHT_DOWN)
