@@ -7,7 +7,7 @@ NB_VIE_BRIQUE_0 = 3
 ALLOW_SOUND = True
 PORT = 8888
 ETH = "wlan0"
-FREQUENCE_TIR = 20
+FREQUENCE_TIR = 150
 
 """
 Configuration personnalisable :

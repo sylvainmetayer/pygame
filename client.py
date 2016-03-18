@@ -82,7 +82,7 @@ def main():
     balle = BallClient()
 
     # Pour autoriser la répétition des touches pressées
-    pygame.key.set_repeat(1, 2000)
+    pygame.key.set_repeat(2000, 2000)
 
     # Fond du jeu
     background_image, background_rect = outils.Fonction.load_png('images/background.jpg')
