@@ -23,9 +23,6 @@ class Ball(pygame.sprite.Sprite):
         self.pas = 10
         self.direction = outils.BAS
 
-    def Network_ball(self, data):
-        self.rect.center = data['center']
-
     def isPointInsideRect(x, y, rect):
         if (x > rect.left) and (x < rect.right) and (y > rect.top) and (y < rect.bottom):
             return True
@@ -123,6 +120,9 @@ class Ball(pygame.sprite.Sprite):
             self.direction = outils.BAS
         else:
             self.direction = outils.HAUT
+
+    def Network_ball(self, data):
+        self.rect.center = data['center']
 
 """ PARTIE CLIENT """
 

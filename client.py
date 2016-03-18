@@ -25,17 +25,16 @@ class Client(ConnectionListener):
         connection.Pump()
         self.Pump()
 
-
     def Network(self, data):
         # ('message de type %s recu' % data['action'])
         pass
 
-    def Network_isAllowedToShot(self, data):
-        self.shotAllowed = data['value']
-        print "MEGALOL" + str(self.shotAllowed)
-
     def Network_info(self, data):
+        """
+        Pour gérer la fin du jeu, et les message informatifs.
+        """
         message = data["message"]
+        print message
         if message == "perdu":
             self.end = 2
             self.game_client = False
@@ -44,6 +43,10 @@ class Client(ConnectionListener):
             self.end = 1
 
     def Network_sound(self, data):
+        """
+        Permet de jouer un son
+        :param data: Le son à jouer
+        """
         if outils.ALLOW_SOUND:
             pygame.mixer.Sound("son/"+data["message"]).play()
 
@@ -72,17 +75,14 @@ def main():
         port = outils.PORT
         ip = outils.IP
 
-
     # Initialisation Pygame
     pygame.init()
     clock = pygame.time.Clock()
+    pygame.key.set_repeat(2000, 2000)
 
     # Instanciation des composants du jeu.
     client = Client(ip, int(port))
     balle = BallClient()
-
-    # Pour autoriser la répétition des touches pressées
-    pygame.key.set_repeat(2000, 2000)
 
     # Fond du jeu
     background_image, background_rect = outils.Fonction.load_png('images/background.jpg')
@@ -90,16 +90,13 @@ def main():
     background_win, background_win_rect = outils.Fonction.load_png("images/win.jpg")
     background_loose, background_loose_rect = outils.Fonction.load_png("images/loose.jpg")
 
-    # Image de waiting shot
-    background_shot, background_shot_rect = outils.Fonction.load_png("images/red_point.png")
-
     # Barre
     bar = BarClient()
     bars = BarsClient()
     bars.add(bar)
     briques = BriquesClient()
 
-    #Depart de la musique
+    # Depart de la musique
     pygame.mixer.music.load("son/music.mp3")
     pygame.mixer.music.set_volume(0.3)
 
@@ -128,6 +125,7 @@ def main():
             # Récupération des touches
             touches = pygame.key.get_pressed()
 
+            # Gestion du mute/unmute
             if touches[K_m]:
                 if outils.ALLOW_SOUND:
                     outils.ALLOW_SOUND = False
@@ -138,12 +136,10 @@ def main():
 
             # Notification au serveur
             client.Send({"action": "keys", "keys": touches})
+
             # On dessine
             if client.end == 3:
                 screen.blit(background_image, background_rect)
-
-                if client.shotAllowed:
-                    screen.blit(background_shot, (250,250))
                 screen.blit(balle.image, balle.rect)
 
                 bars.draw(screen)
@@ -155,6 +151,7 @@ def main():
         # IMPORTANT
         pygame.display.flip()
 
+    # Fin du jeu
     pygame.mixer.music.stop()
     if client.end == 2:
         if outils.ALLOW_SOUND:
@@ -167,9 +164,11 @@ def main():
         screen.blit(background_win, background_win_rect)
     if client.end == 1:
         screen.blit(background_loose, background_loose_rect)
+
     pygame.display.flip()
 
     while True:
+        # Pour garder le background de fin.
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 sys.exit(0)

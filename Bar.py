@@ -7,8 +7,8 @@ from PodSixNet.Connection import ConnectionListener
 
 import outils
 
+''' Partie Serveur '''
 
-# Partie Serveur
 
 class Bar(pygame.sprite.Sprite):
     """

@@ -59,10 +59,6 @@ class ClientChannel(Channel, pygame.sprite.Sprite):
                 else:
                     self.shotAllowed = True
 
-    def send_status_shot(self):
-        print self.shotAllowed
-        self.Send({"action":"isAllowedToShot", "value":self.shotAllowed})
-
     def update_bar(self):
         self.bar.update()
         self.tir_sprites.update(self.joueur)
@@ -222,7 +218,6 @@ class MyServer(Server):
                 # Collision joueur - tir 1
                 self.remove_client(outils.KILL_J2)
 
-
     def launch_game(self):
         screen = self.screen
         background_image, background_rect = outils.Fonction.load_png('images/background.jpg')
@@ -259,9 +254,6 @@ class MyServer(Server):
                 pygame.sprite.groupcollide(self.briques, self.clients.__getitem__(outils.J2).tir_sprites, False, True, pygame.sprite.collide_circle_ratio(0.7))
                 self.update_balle()
                 self.check_collision_tir_player()
-                # Gestion collision Joueur tir
-                #pygame.sprite.groupcollide(self.spriteJ1, self.clients.__getitem__(outils.J1).tir_sprites, True, True, pygame.sprite.collide_circle_ratio(0.7))
-                #pygame.sprite.groupcollide(self.spriteJ2, self.clients.__getitem__(outils.J2).tir_sprites, True, True, pygame.sprite.collide_circle_ratio(0.7))
                 self.send_bar()
                 self.send_balle()
                 self.send_briques()
@@ -277,7 +269,7 @@ class MyServer(Server):
 
 
 def main_prog():
-    if len(sys.argv) == 2:
+    if len(sys.argv) == 3:
         port = sys.argv[2]
         ip = sys.argv[1]
     else:

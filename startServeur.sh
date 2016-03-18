@@ -1,14 +1,20 @@
 #!/bin/sh
 
-echo "Arrets des jeux precedents..."
+if test $# -eq 0
+then
+        echo "Syntaxe : $0 \`pwd\`"
+        return 1
+else
 
-./stop.sh $1
+        echo "Arrets des jeux precedents..."
 
-echo "Les precedents jeux ont ete arretes.\nLancement d'un nouveau jeu."
+        ./stop.sh $1
 
-python $1/serveur.py | tee logs/serveur.log &
-sleep 1 #pour être sur que le serveur soit lancé
-python $1/client.py > logs/client2.log &
+	echo "Les anciens jeux ont été arreté. Lancement d'un nouveau jeu."
 
-echo "Le serveur et un client ont été lancé\nMerci de lancer un deuxième client sur un autre poste"
+	python $1/serveur.py | tee logs/serveur.log &
+        sleep 1 #pour être sur que le serveur soit lancé
+	python $1/client.py > logs/client.log &
 
+        echo "Le serveur et les clients ont été lancé\nBon jeu !\nL'ip et le port utilisé sont ceux indiqué dans le fichier \"configuration.py\" "
+fi

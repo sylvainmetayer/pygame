@@ -1,7 +1,6 @@
 #!/usr/bin/python2
 # -*- coding: utf-8 -*-
 
-
 BALL_SPEED = 3
 NB_VIE_BRIQUE_0 = 3
 ALLOW_SOUND = True
@@ -18,11 +17,4 @@ Configuration personnalisable :
     - ETH : Interface réseau à utiliser pour récupérer l'adresse IP
     - PORT : Port du jeu.
     - FREQUENCE_TIR : La fréquence de tir des joueurs.
-"""
-
-"""
-Source des sons / images :
-win.wav : https://www.youtube.com/watch?v=OyTDjr5gpE0
-loose.wav : https://www.youtube.com/watch?v=rX7wtNOkuHo
-
 """

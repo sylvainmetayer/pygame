@@ -12,8 +12,7 @@ import outils
 
 class Brique(pygame.sprite.Sprite):
     """
-    Classe qui réprésente une brique normale
-    Cette classe à 2 vies.
+    Classe qui réprésente une brique côté serveur.
     """
 
     def __init__(self, position):
@@ -23,12 +22,19 @@ class Brique(pygame.sprite.Sprite):
         self.vie = outils.NB_VIE_BRIQUE_0
 
     def hit(self):
+        """
+        On décrémente le nombre de vie de la brique, et si elle n'a plus de vie, on la tue.
+        """
         self.vie -= 1
         if self.vie == 0:
             self.kill()
 
     def gestion(self, balle):
-        width_brique = (self.rect.center[0] - self.rect.left) + (self.rect.center[0] - self.rect.right )
+        """
+        On gère les collisions de la balle avec les briques.
+        :param balle: Sprite de la balle
+        :return: True si collison, False sinon
+        """
 
         if pygame.sprite.collide_circle(self, balle):
             self.hit()

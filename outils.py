@@ -18,6 +18,7 @@ PORT = configuration.PORT
 ETH = configuration.ETH
 FREQUENCE_TIR = configuration.FREQUENCE_TIR
 
+
 class Fonction():
     def __init__(self):
         pass
@@ -61,20 +62,20 @@ COTE_DROIT = SCREEN_WIDTH
 COTE_HAUT = 0
 COTE_BAS = SCREEN_HEIGHT
 
-
 SIZE_SERVEUR = ((SCREEN_WIDTH / 4, SCREEN_HEIGHT / 4))
 
+# Joueurs
 POS_J1 = [SCREEN_WIDTH / 2, SCREEN_HEIGHT / 4 - 100]
 POS_J2 = [SCREEN_WIDTH / 2, SCREEN_HEIGHT - 100]
-
 KILL_J1 = 10
 J1 = 0
-
 J2 = 1
 KILL_J2 = 20
 
 
 MARGE_ZONE = 99
+POS_BALLE = [SCREEN_WIDTH / 2 -50 , SCREEN_HEIGHT / 2 +50]
+PLAY_SOUND_VAR = 0
 
 # Gestion pour les murs
 HAUT = 1
@@ -88,9 +89,5 @@ LEFT_DOWN = [-BALL_SPEED, BALL_SPEED]
 RIGHT_DOWN = [BALL_SPEED, BALL_SPEED]
 RIGHT_UP = [BALL_SPEED, -BALL_SPEED]
 
-POS_BALLE = [SCREEN_WIDTH / 2 -50 , SCREEN_HEIGHT / 2 +50]
-
-PLAY_SOUND_VAR = 0
-# LEs briques
-
+# Récuperer l'IP automatiquement selon l'interface
 IP = Fonction.get_ip_address(ETH)
