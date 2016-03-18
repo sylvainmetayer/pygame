@@ -7,6 +7,7 @@ NB_VIE_BRIQUE_0 = 3
 ALLOW_SOUND = True
 PORT = 8888
 ETH = "wlan0"
+FREQUENCE_TIR = 200
 
 """
 Configuration personnalisable :
@@ -16,6 +17,7 @@ Configuration personnalisable :
     Si jamais on lance le fichier python sans paramètres, les fichiers seront chargés avec les valeurs PORT et ETH
     - ETH : Interface réseau à utiliser pour récupérer l'adresse IP
     - PORT : Port du jeu.
+    - FREQUENCE_TIR : La fréquence de tir des joueurs.
 """
 
 """

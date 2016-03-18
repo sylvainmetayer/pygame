@@ -32,6 +32,7 @@ class Client(ConnectionListener):
 
     def Network_isAllowedToShot(self, data):
         self.shotAllowed = data['value']
+        print "MEGALOL" + str(self.shotAllowed)
 
     def Network_info(self, data):
         message = data["message"]
@@ -139,9 +140,10 @@ def main():
             client.Send({"action": "keys", "keys": touches})
             # On dessine
             if client.end == 3:
-                screen.blit(background_shot, (250,250))
-
                 screen.blit(background_image, background_rect)
+
+                if client.shotAllowed:
+                    screen.blit(background_shot, (250,250))
                 screen.blit(balle.image, balle.rect)
 
                 bars.draw(screen)

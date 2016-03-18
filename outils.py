@@ -16,7 +16,7 @@ NB_VIE_BRIQUE_0 = configuration.NB_VIE_BRIQUE_0
 ALLOW_SOUND = configuration.ALLOW_SOUND
 PORT = configuration.PORT
 ETH = configuration.ETH
-
+FREQUENCE_TIR = configuration.FREQUENCE_TIR
 
 class Fonction():
     def __init__(self):

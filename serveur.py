@@ -25,7 +25,7 @@ class ClientChannel(Channel, pygame.sprite.Sprite):
         Channel.__init__(self, *args, **kwargs)
         pygame.sprite.Sprite.__init__(self)
         self.bar = Bar()
-        self.tirCompteurTmp = 40
+        self.tirCompteurTmp = outils.FREQUENCE_TIR
         self.shotAllowed = True
         self.tir_sprites = Tirs()
         self.joueur = outils.J1
@@ -47,12 +47,12 @@ class ClientChannel(Channel, pygame.sprite.Sprite):
         if touches[K_LEFT] or touches[K_q]:
             self.bar.left()
         if touches[K_SPACE]:
+            self.send_status_shot()
             if self.shotAllowed:
                 tir = Tir(self.bar)
                 self.tir_sprites.add(tir)
                 self.shotAllowed = False
-                self.send_status_shot()
-                self.tirCompteurTmp = 40
+                self.tirCompteurTmp = outils.FREQUENCE_TIR
             else:
                 if self.tirCompteurTmp >= 0:
                     self.tirCompteurTmp -= 1
