@@ -181,7 +181,8 @@ class MyServer(Server):
 
     def send_balle(self):
         for client in self.clients:
-            print "Balle : " + self.balle.rect.center
+            print "Balle : \n\t"
+            print self.balle.rect.center
             client.Send({"action": "balle", "center": self.balle.rect.center})
             print "Liste Tirs : \n\t"
             print self.get_shot()
