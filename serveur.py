@@ -52,6 +52,7 @@ class ClientChannel(Channel, pygame.sprite.Sprite):
                 self.tir_sprites.add(tir)
                 self.shotAllowed = False
                 self.tirCompteurTmp = outils.FREQUENCE_TIR
+                self.send_info("sound", "shot.wav")
             else:
                 if self.tirCompteurTmp >= 0:
                     self.tirCompteurTmp -= 1
@@ -61,6 +62,10 @@ class ClientChannel(Channel, pygame.sprite.Sprite):
     def update_bar(self):
         self.bar.update()
         self.tir_sprites.update(self.joueur)
+
+    def send_info(self, action, message):
+        print message
+        self.Send({"action": action, "message": message})
 
     def get_bar(self):
         return self.bar
@@ -207,12 +212,10 @@ class MyServer(Server):
 
     def check_collision_tir_player(self):
         for tir in self.clients.__getitem__(outils.J1).tir_sprites:
-            print "LOL_J1"
             if pygame.sprite.collide_rect(tir, self.clients.__getitem__(outils.J2).get_bar()):
                 # Collision joueur - tir 1
                 self.remove_client(outils.KILL_J1)
         for tir in self.clients.__getitem__(outils.J2).tir_sprites:
-            print "LOL_J2"
             if pygame.sprite.collide_rect(tir, self.clients.__getitem__(outils.J1).get_bar()):
                 # Collision joueur - tir 1
                 self.remove_client(outils.KILL_J2)
