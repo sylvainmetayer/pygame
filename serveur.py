@@ -13,6 +13,7 @@ import outils
 from Balle import Ball
 from Bar import Bar, Bars
 from Brique import Briques, Brique
+from Tir import Tirs, Tir
 
 
 class ClientChannel(Channel, pygame.sprite.Sprite):
@@ -24,6 +25,9 @@ class ClientChannel(Channel, pygame.sprite.Sprite):
         Channel.__init__(self, *args, **kwargs)
         pygame.sprite.Sprite.__init__(self)
         self.bar = Bar()
+        self.tirCompteurTmp = 30
+        self.shotAllowed = True
+        self.tir_sprites = Tirs()
 
     def Close(self):
         self._server.del_client(self)
@@ -41,10 +45,21 @@ class ClientChannel(Channel, pygame.sprite.Sprite):
             self.bar.right()
         if touches[K_LEFT] or touches[K_q]:
             self.bar.left()
-
+        if touches[K_SPACE]:
+            if self.shotAllowed:
+                tir = Tir(self.bar)
+                self.tir_sprites.add(tir)
+                self.shotAllowed = False
+                self.tirCompteurTmp = 30
+            else:
+                if self.tirCompteurTmp >= 0:
+                    self.tirCompteurTmp -= 1
+                else:
+                    self.shotAllowed = True
 
     def update_bar(self):
         self.bar.update()
+        self.tir_sprites.update()
 
     def get_bar(self):
         return self.bar
@@ -82,9 +97,20 @@ class MyServer(Server):
             channel.Send({"action": "error", "error": "La partie est pleine"})
             # self.run = True
 
+    def get_shot(self):
+        liste = []
+        for client in self.clients:
+            for tir in client.tir_sprites:
+                liste.append(tir.rect.center)
+        return liste
+
     def update_bar(self):
         for client in self.clients:
             client.update_bar()
+
+    def send_shot(self):
+        self.send_info("shot", self.clients.__getitem__(outils.J1).get_shot())
+        self.send_info("shot", self.clients.__getitem__(outils.J2).get_shot())
 
     def remove_client(self, joueur):
         if joueur == outils.KILL_J1:
@@ -139,10 +165,12 @@ class MyServer(Server):
     def send_bar(self):
         for client in self.clients:
             client.Send({"action": "bar", "liste": self.get_positions_bars()})
+            client.Send
 
     def send_balle(self):
         for client in self.clients:
             client.Send({"action": "balle", "center": self.balle.rect.center})
+            client.Send({"action": "shot", "liste":self.get_shot()})
 
     def send_info(self, action, message):
         """

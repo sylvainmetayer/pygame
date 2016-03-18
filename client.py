@@ -11,6 +11,7 @@ import outils
 from Balle import BallClient
 from Bar import BarClient, BarsClient
 from Brique import BriquesClient
+from Tir import TirsClient
 
 
 class Client(ConnectionListener):
@@ -95,10 +96,11 @@ def main():
     #Depart de la musique
     pygame.mixer.music.load("son/music.mp3")
     pygame.mixer.music.set_volume(0.3)
-    
+
     if outils.ALLOW_SOUND:
         pygame.mixer.music.play(-1)
 
+    tir_sprites = TirsClient()
 
     # Boucle de jeu principale
     while client.game_client:
@@ -109,6 +111,7 @@ def main():
         bars.update()
         balle.update()
         briques.update()
+        tir_sprites.update()
 
         # Pour quitter
         for event in pygame.event.get():
@@ -120,7 +123,6 @@ def main():
             touches = pygame.key.get_pressed()
 
             if touches[K_m]:
-                print "Hello"
                 if outils.ALLOW_SOUND:
                     outils.ALLOW_SOUND = False
                     pygame.mixer.music.pause()
@@ -130,13 +132,14 @@ def main():
 
             # Notification au serveur
             client.Send({"action": "keys", "keys": touches})
-            print "Coucou"
             # On dessine
             if client.end == 3:
                 screen.blit(background_image, background_rect)
                 screen.blit(balle.image, balle.rect)
+
                 bars.draw(screen)
                 briques.draw(screen)
+                tir_sprites.draw(screen)
         else:
             screen.blit(background_load, background_load_rect)
 
